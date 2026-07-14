@@ -54,6 +54,7 @@ Analiz ekranını başlat:
 
 Tarayıcıda açılan ekrandan rapor grubu, tablo, finansal metrik, kurum ve
 iki ayrı karşılaştırma dönemi seçilebilir. Seçili bankalar çizgi veya sütun
-grafiğinde karşılaştırılabilir. Banka seçiminde sayı sınırı yoktur. Metrik
+grafiğinde karşılaştırılabilir; daire grafikle dönem dağılımı incelenebilir. Banka
+seçiminde sayı sınırı yoktur ve tüm kurumlar tek seferde seçilebilir. Metrik
 hesaplayıcı ile farklı iki metrik için oran, yüzde oranı veya fark hesaplanabilir.
 Grafiklerin altındaki veri CSV olarak indirilebilir.

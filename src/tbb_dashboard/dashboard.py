@@ -203,16 +203,25 @@ with st.sidebar:
         "group": "Gösterilecek banka grupları",
         "sector": "Gösterilecek sektör toplamları",
     }
-    entities = st.multiselect(
-        entity_selection_labels[entity_type],
-        all_entities,
-        default=default_entities,
-        placeholder="Seçim yapın",
+    select_all_entities = st.checkbox(
+        "Tüm bankaları/kurumları seç",
+        key=f"select_all_{entity_type}",
     )
-    st.caption("Banka/kurum seçiminde sınır yoktur.")
+    if select_all_entities:
+        entities = all_entities
+        st.success(f"{len(entities)} banka/kurum seçildi.")
+    else:
+        entities = st.multiselect(
+            entity_selection_labels[entity_type],
+            all_entities,
+            default=default_entities,
+            placeholder="Kutuyu açıp banka/kurum seçin",
+            help="İstediğiniz sayıda banka veya kurum seçebilirsiniz.",
+        )
+        st.caption(f"{len(entities)} banka/kurum seçildi. Seçim sınırı yoktur.")
     chart_type = st.radio(
-        "Zaman grafiği türü",
-        ["Çizgi", "Sütun"],
+        "Grafik türü",
+        ["Çizgi", "Sütun", "Daire"],
         horizontal=True,
     )
 
@@ -279,24 +288,67 @@ with comparison_tab:
             data["entity_name"].isin(entities)
             & data["period_end"].isin([start_date, end_date])
         ].copy()
-        comparison_figure = px.bar(
-            endpoints,
-            x="entity_name",
-            y="value",
-            color="period_label",
-            barmode="group",
-            labels={"entity_name": "", "value": unit, "period_label": "Dönem"},
-            color_discrete_sequence=["#94a3b8", "#0f766e"],
-        )
-        comparison_figure.update_layout(
-            height=500,
-            margin=dict(l=10, r=10, t=30, b=10),
-            legend_title_text="",
-            plot_bgcolor="white",
-            paper_bgcolor="white",
-        )
-        comparison_figure.update_xaxes(tickangle=-25)
-        st.plotly_chart(comparison_figure, width="stretch")
+        if chart_type == "Daire":
+            start_pie, end_pie = st.columns(2)
+            for column, period in ((start_pie, start_date), (end_pie, end_date)):
+                snapshot = endpoints[endpoints["period_end"] == period].copy()
+                snapshot["pie_value"] = snapshot["value"].abs()
+                pie_figure = px.pie(
+                    snapshot,
+                    names="entity_name",
+                    values="pie_value",
+                    hole=0.38,
+                    title=period_labels[period],
+                    color_discrete_sequence=px.colors.qualitative.Safe,
+                )
+                pie_figure.update_layout(
+                    height=480,
+                    margin=dict(l=10, r=10, t=55, b=10),
+                    legend_title_text="",
+                )
+                column.plotly_chart(pie_figure, width="stretch")
+            st.caption("Daire grafiklerde dağılım, değerlerin mutlak büyüklüğüyle gösterilir.")
+        else:
+            comparison_chart_options = dict(
+                data_frame=endpoints,
+                x="period_end" if chart_type == "Çizgi" else "entity_name",
+                y="value",
+                color="entity_name" if chart_type == "Çizgi" else "period_label",
+                labels={
+                    "entity_name": "Banka / kurum",
+                    "period_end": "Dönem",
+                    "value": unit,
+                    "period_label": "Dönem",
+                },
+                color_discrete_sequence=[
+                    "#0f766e",
+                    "#2563eb",
+                    "#d97706",
+                    "#7c3aed",
+                    "#dc2626",
+                    "#94a3b8",
+                ],
+            )
+            if chart_type == "Çizgi":
+                comparison_figure = px.line(**comparison_chart_options, markers=True)
+            else:
+                comparison_figure = px.bar(**comparison_chart_options, barmode="group")
+            comparison_figure.update_layout(
+                height=500,
+                margin=dict(l=10, r=10, t=30, b=10),
+                legend_title_text="",
+                hovermode="x unified" if chart_type == "Çizgi" else "closest",
+                plot_bgcolor="white",
+                paper_bgcolor="white",
+            )
+            if chart_type == "Çizgi":
+                comparison_figure.update_xaxes(
+                    tickvals=[start_date, end_date],
+                    ticktext=[period_labels[start_date], period_labels[end_date]],
+                )
+            else:
+                comparison_figure.update_xaxes(tickangle=-25)
+            st.plotly_chart(comparison_figure, width="stretch")
 
         comparison = endpoints.pivot_table(
             index="entity_name",
@@ -442,8 +494,21 @@ with calculator_tab:
             )
             if chart_type == "Çizgi":
                 calculator_figure = px.line(**calculator_chart_options, markers=True)
-            else:
+            elif chart_type == "Sütun":
                 calculator_figure = px.bar(**calculator_chart_options, barmode="group")
+            else:
+                calculator_snapshot = calculation[
+                    calculation["period_end"] == end_date
+                ].copy()
+                calculator_snapshot["pie_value"] = calculator_snapshot["result"].abs()
+                calculator_figure = px.pie(
+                    calculator_snapshot,
+                    names="entity_name",
+                    values="pie_value",
+                    hole=0.38,
+                    title=f"{result_label} • {period_labels[end_date]}",
+                    color_discrete_sequence=px.colors.qualitative.Safe,
+                )
             calculator_figure.update_layout(
                 height=500,
                 margin=dict(l=10, r=10, t=45, b=10),
@@ -451,12 +516,18 @@ with calculator_tab:
                 hovermode="x unified" if chart_type == "Çizgi" else "closest",
                 plot_bgcolor="white",
                 paper_bgcolor="white",
-                title=result_label,
+                title=result_label if chart_type != "Daire" else None,
             )
-            calculator_figure.update_xaxes(
-                tickvals=visible_periods,
-                ticktext=[period_labels[item] for item in visible_periods],
-            )
+            if chart_type != "Daire":
+                calculator_figure.update_xaxes(
+                    tickvals=visible_periods,
+                    ticktext=[period_labels[item] for item in visible_periods],
+                )
+            else:
+                st.caption(
+                    "Daire grafik, bitiş dönemindeki hesaplama sonuçlarının "
+                    "mutlak büyüklük dağılımını gösterir."
+                )
             st.plotly_chart(calculator_figure, width="stretch")
 
             calculator_table = calculation[
@@ -498,33 +569,69 @@ with trend_tab:
         )
         if chart_type == "Çizgi":
             figure = px.line(**chart_options, markers=True)
-        else:
+        elif chart_type == "Sütun":
             figure = px.bar(**chart_options, barmode="group")
+        else:
+            trend_snapshot = filtered[filtered["period_end"] == end_date].copy()
+            trend_snapshot["pie_value"] = trend_snapshot["value"].abs()
+            figure = px.pie(
+                trend_snapshot,
+                names="entity_name",
+                values="pie_value",
+                hole=0.38,
+                title=f"{period_labels[end_date]} dağılımı",
+                color_discrete_sequence=px.colors.qualitative.Safe,
+            )
         figure.update_layout(
             height=480,
             margin=dict(l=10, r=10, t=30, b=10),
             legend_title_text="",
-            hovermode="x unified",
+            hovermode="x unified" if chart_type == "Çizgi" else "closest",
             plot_bgcolor="white",
             paper_bgcolor="white",
         )
-        figure.update_xaxes(
-            tickvals=visible_periods,
-            ticktext=[period_labels[item] for item in visible_periods],
-        )
+        if chart_type != "Daire":
+            figure.update_xaxes(
+                tickvals=visible_periods,
+                ticktext=[period_labels[item] for item in visible_periods],
+            )
+        else:
+            st.caption(
+                "Daire grafik, bitiş dönemindeki değerlerin mutlak büyüklük dağılımını gösterir."
+            )
         st.plotly_chart(figure, width="stretch")
 
 with ranking_tab:
     ranking = data[data["period_end"] == end_date].nlargest(15, "value").sort_values("value")
-    rank_figure = px.bar(
-        ranking,
-        x="value",
-        y="entity_name",
-        orientation="h",
-        labels={"value": unit, "entity_name": ""},
-        color="value",
-        color_continuous_scale=["#bfe8e3", "#0f766e"],
-    )
+    if chart_type == "Daire":
+        ranking = ranking.copy()
+        ranking["pie_value"] = ranking["value"].abs()
+        rank_figure = px.pie(
+            ranking,
+            names="entity_name",
+            values="pie_value",
+            hole=0.38,
+            color_discrete_sequence=px.colors.qualitative.Safe,
+        )
+    elif chart_type == "Çizgi":
+        rank_figure = px.line(
+            ranking.sort_values("value", ascending=False),
+            x="entity_name",
+            y="value",
+            markers=True,
+            labels={"value": unit, "entity_name": ""},
+            color_discrete_sequence=["#0f766e"],
+        )
+    else:
+        rank_figure = px.bar(
+            ranking,
+            x="value",
+            y="entity_name",
+            orientation="h",
+            labels={"value": unit, "entity_name": ""},
+            color="value",
+            color_continuous_scale=["#bfe8e3", "#0f766e"],
+        )
     rank_figure.update_layout(
         height=560,
         margin=dict(l=10, r=10, t=30, b=10),
@@ -533,6 +640,8 @@ with ranking_tab:
         paper_bgcolor="white",
         title=f"{period_labels[end_date]} • En yüksek 15",
     )
+    if chart_type == "Çizgi":
+        rank_figure.update_xaxes(tickangle=-25)
     st.plotly_chart(rank_figure, width="stretch")
 
 with table_tab:
