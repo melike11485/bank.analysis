@@ -5,13 +5,13 @@ keşif ve tek seferlik analizlerde yardımcı araç olarak kullanılmalıdır.
 
 ## TBB'den otomatik indirme
 
-Belirli dokuz dönemi indir:
+Belirli tarih aralığını indir:
 
-    python -m src.tbb_dashboard.download --start 2024-03 --end 2026-03
+    python -m src.tbb_dashboard.download --start 2020-03 --end 2026-03
 
-Mart 2024'ten bugüne kadar yayımlanmış bütün çeyrekleri kontrol et:
+Mart 2020'den bugüne kadar yayımlanmış bütün çeyrekleri kontrol et:
 
-    python -m src.tbb_dashboard.download --start 2024-03
+    python -m src.tbb_dashboard.download
 
 Program TBB sayfasındaki yıl kimliklerini, dönem raporunu ve rapordaki XLS bağlantılarını
 kendisi keşfeder. Geçerli mevcut dosyaları tekrar indirmez. Her dosyanın SHA-256 özeti
@@ -41,3 +41,19 @@ Temel tablolar:
 
 Yeni dönem indirildikten sonra aynı ingest komutunu yeniden çalıştırmak yeterlidir.
 İlgili dönem yenilenir ve mükerrer gözlem oluşmaz.
+
+## Dashboard'u çalıştırma
+
+Dashboard paketlerini ilk seferde yükle:
+
+    python3 -m pip install -r requirements.txt
+
+Analiz ekranını başlat:
+
+    python3 -m streamlit run src/tbb_dashboard/dashboard.py
+
+Tarayıcıda açılan ekrandan rapor grubu, tablo, finansal metrik, kurum ve
+iki ayrı karşılaştırma dönemi seçilebilir. Seçili bankalar çizgi veya sütun
+grafiğinde karşılaştırılabilir. Banka seçiminde sayı sınırı yoktur. Metrik
+hesaplayıcı ile farklı iki metrik için oran, yüzde oranı veya fark hesaplanabilir.
+Grafiklerin altındaki veri CSV olarak indirilebilir.

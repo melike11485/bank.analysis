@@ -18,6 +18,7 @@ BASE_URL = "https://www.tbb.org.tr"
 CATEGORY_URL = f"{BASE_URL}/istatistiki-raporlar/11236"
 REPORT_CATEGORY_ID = "11244"
 QUARTER_MONTHS = (3, 6, 9, 12)
+DEFAULT_START = (2020, 3)
 OLE_SIGNATURE = bytes.fromhex("D0CF11E0A1B11AE1")
 USER_AGENT = "TBB-dashboard-research/1.0 (+personal analytical use)"
 
@@ -197,7 +198,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="TBB solo banka seçilmiş tablolarını çeyrek bazında indirir"
     )
-    parser.add_argument("--start", type=parse_period, default=(2024, 3))
+    parser.add_argument("--start", type=parse_period, default=DEFAULT_START)
     parser.add_argument("--end", type=parse_period, default=current_quarter())
     parser.add_argument("--output", type=Path, default=Path("data/raw"))
     parser.add_argument("--delay", type=float, default=0.4)
@@ -210,4 +211,3 @@ if __name__ == "__main__":
         sync(args.start, args.end, args.output, args.delay)
     except (HTTPError, URLError) as error:
         raise SystemExit(f"TBB bağlantı hatası: {error}") from error
-

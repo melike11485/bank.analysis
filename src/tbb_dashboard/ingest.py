@@ -20,6 +20,14 @@ SOURCE_GROUPS = {
     "4": "gelir_gider",
     "5": "nazim",
 }
+GROUP_ENTITY_KEYS = {
+    "kalkinma_ve_yatirim_bankalari",
+    "kamu_sermayeli_bankalar",
+    "mevduat_bankalari",
+    "tas_mevd_sig_fonuna_devr_bankalar",
+    "yabanci_sermayeli_bankalar",
+    "ozel_sermayeli_bankalar",
+}
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS observations (
     observation_id TEXT PRIMARY KEY,
@@ -155,10 +163,10 @@ def infer_unit(title: str, metric: str) -> str:
 
 
 def classify_entity(raw: str) -> str:
-    clean = normalize_space(raw).casefold()
-    if clean.startswith("sektör"):
+    clean = canonical_text(raw)
+    if clean.startswith("sektor"):
         return "sector"
-    if raw != raw.strip():
+    if clean in GROUP_ENTITY_KEYS:
         return "group"
     return "bank"
 
