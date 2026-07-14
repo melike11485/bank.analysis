@@ -52,9 +52,22 @@ Analiz ekranını başlat:
 
     python3 -m streamlit run src/tbb_dashboard/dashboard.py
 
-Tarayıcıda açılan ekrandan rapor grubu, tablo, finansal metrik, kurum ve
-iki ayrı karşılaştırma dönemi seçilebilir. Seçili bankalar çizgi veya sütun
-grafiğinde karşılaştırılabilir; daire grafikle dönem dağılımı incelenebilir. Banka
-seçiminde sayı sınırı yoktur ve tüm kurumlar tek seferde seçilebilir. Metrik
-hesaplayıcı ile farklı iki metrik için oran, yüzde oranı veya fark hesaplanabilir.
+Tarayıcıda açılan ekran ilk olarak dönemsel analizi gösterir. Dönemsel analiz,
+zaman analizi ve özelleştirilebilir metrikler birbirinden bağımsız ana
+sekmelerdir. Dönemsel analizde seçili bankaların tek dönem grafiği ve ilk 10
+banka sıralaması bulunur. Zaman analizi; dönem seyrini, başlangıç–bitiş
+karşılaştırmasını, çeyreklik değişimi ve yıllık değişimi aynı filtrelerle
+gösterir. Sol filtre paneli kullanılmaz;
+her ana sekme kendi rapor, metrik, dönem, banka/kurum ve grafik ayarlarını içerir.
+İşaret kutulu açılır filtre; arama, alfabetik veya değer bazlı sıralama, tümünü
+seçme ve seçimden çıkarma olanağı verir. Karşılaştırma düzeyi yalnızca Bankalar
+ve Banka Grupları seçeneklerinden oluşur. Her ana analiz kendi veri tablosu ve veri
+kalitesi alt sekmelerini kullanır; eksik kayıtlar dönem ve banka/kurum bazında
+listelenir ve CSV olarak indirilebilir.
+Seçili bankalar çizgi veya sütun grafiğinde
+karşılaştırılabilir, daire grafikle dönem dağılımı incelenebilir.
+Banka seçiminde sayı sınırı yoktur ve tüm kurumlar tek seferde seçilebilir.
+Özelleştirilebilir metrikler sekmesi A–H arasında sekiz metriği formülde
+birleştirebilir. Toplama, çıkarma, çarpma, bölme/oran ve yüzde oran işlemleri ile
+`A+B/C` veya `(A+B)/(C-D)` gibi parantezli formüller desteklenir.
 Grafiklerin altındaki veri CSV olarak indirilebilir.
