@@ -179,3 +179,9 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+# bank.analysis generated data
+data/raw/
+data/processed/
+outputs/
+.DS_Store
+node_modules
