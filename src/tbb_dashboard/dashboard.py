@@ -3,17 +3,23 @@ from __future__ import annotations
 import ast
 import hashlib
 import sqlite3
+import sys
 from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+# Streamlit Community Cloud runs this file from its own directory, so the
+# repository root is not guaranteed to be on Python's module search path.
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from src.tbb_dashboard.labels import SHEET_LABELS, metric_display_label
 from src.tbb_dashboard.ingest import ensure_database
 
 
-ROOT = Path(__file__).resolve().parents[2]
 RAW_DIR = ROOT / "data" / "raw"
 DB_PATH = ROOT / "data" / "processed" / "tbb.db"
 
