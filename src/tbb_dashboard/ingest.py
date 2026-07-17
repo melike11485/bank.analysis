@@ -28,6 +28,12 @@ GROUP_ENTITY_KEYS = {
     "yabanci_sermayeli_bankalar",
     "ozel_sermayeli_bankalar",
 }
+SUMMARY_FALLBACK_METRICS = {
+    ("pasifler", "ser_benz"): (
+        "pasifler.yukumlulukler."
+        "diger_pasifler_sermaye_benzeri_borclanma_araclari"
+    ),
+}
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS observations (
     observation_id TEXT PRIMARY KEY,
@@ -114,22 +120,82 @@ def report_title(sheet: xlrd.sheet.Sheet) -> str:
     return ""
 
 
+def first_data_row(sheet: xlrd.sheet.Sheet) -> int:
+    """Return the first row that contains an entity and at least one value."""
+    for row in range(sheet.nrows):
+        entity = normalize_space(sheet.cell_value(row, 0)) if sheet.ncols else ""
+        if entity and any(
+            isinstance(sheet.cell_value(row, col), (int, float))
+            for col in range(1, sheet.ncols)
+        ):
+            return row
+    raise ValueError(f"Sayısal veri başlangıcı bulunamadı: {sheet.name}")
+
+
+def normalize_header_part(value: object) -> str:
+    """Normalize visual continuation labels without changing their meaning."""
+    text = str(value or "")
+    # Excel'de sözcük satır sonunda tireyle bölünmüşse bu tire metnin parçası
+    # değildir. Yeni satır bilgisini boşluğa çevirmeden önce sözcüğü birleştir.
+    text = re.sub(r"(?<=\w)-\s*(?:\r\n|\r|\n)\s*(?=\w)", "", text)
+    text = normalize_space(text)
+    for wrapped, complete in {
+        "Yükümlü-lükler": "Yükümlülükler",
+        "Sınıflandırıl-mayacak": "Sınıflandırılmayacak",
+        "Gayri- menkuller": "Gayrimenkuller",
+        "Uygulama- yan": "Uygulamayan",
+        "Gayrimen-kul": "Gayrimenkul",
+    }.items():
+        text = text.replace(wrapped, complete)
+    return re.sub(r"\s+devam[ıi](?:\.{3}|…)?\s*$", "", text, flags=re.IGNORECASE)
+
+
+def header_boundary(sheet: xlrd.sheet.Sheet, row: int, col: int, side: str) -> bool:
+    """Return whether the formatted cell starts/ends a visual header group."""
+    try:
+        xf = sheet.book.xf_list[sheet.cell_xf_index(row, col)]
+        return bool(getattr(xf.border, f"{side}_line_style"))
+    except (AttributeError, IndexError):
+        # Lightweight test sheets and unformatted workbooks may not expose XF.
+        return False
+
+
 def expanded_header_matrix(sheet: xlrd.sheet.Sheet) -> list[list[str]]:
-    rows = range(3, min(6, sheet.nrows))
+    # TBB şablonlarında başlık alanı dönemlere göre bir satır aşağı/yukarı
+    # kayabiliyor. Veri başlangıcının hemen üstündeki boş satırı dışarıda
+    # bırakarak tüm başlık katmanlarını dinamik biçimde al.
+    data_start = first_data_row(sheet)
+    rows = range(2, max(3, data_start - 1))
     matrix = [
-        [normalize_space(sheet.cell_value(row, col)) for col in range(sheet.ncols)]
+        [normalize_header_part(sheet.cell_value(row, col)) for col in range(sheet.ncols)]
         for row in rows
     ]
     row_index = {row: index for index, row in enumerate(rows)}
     for row_start, row_end, col_start, col_end in sheet.merged_cells:
         if row_start not in row_index:
             continue
-        value = normalize_space(sheet.cell_value(row_start, col_start))
+        value = normalize_header_part(sheet.cell_value(row_start, col_start))
         for row in range(row_start, min(row_end, rows.stop)):
             if row not in row_index:
                 continue
             for col in range(col_start, col_end):
                 matrix[row_index[row]][col] = value
+
+    # Bazı üst başlıklar görsel olarak birden fazla sütunu kapsadığı halde XLS
+    # dosyasında birleştirilmiş hücre olarak işaretlenmemiş. En alt metrik
+    # satırını değiştirmeden üst başlıkları bir sonraki başlığa kadar taşı.
+    for matrix_row, row in enumerate(matrix[:-1]):
+        source_row = rows.start + matrix_row
+        current_group = ""
+        for col in range(1, sheet.ncols):
+            if row[col]:
+                current_group = row[col]
+            elif current_group:
+                row[col] = current_group
+            # Sağ kenarlık görsel üst başlığın bittiği yerdir. Sonraki boş
+            # sütuna aynı başlığı taşımayız.
+            if header_boundary(sheet, source_row, col, "right"):
+                current_group = ""
     return matrix
 
 
@@ -140,12 +206,13 @@ def metric_headers(sheet: xlrd.sheet.Sheet) -> list[str]:
     for col in range(1, sheet.ncols):
         parts: list[str] = []
         for row in matrix:
-            value = row[col]
+            value = normalize_header_part(row[col])
             if value and value.casefold() != "banka" and (not parts or parts[-1] != value):
                 parts.append(value)
         base = " > ".join(parts) or f"metric_col_{col + 1:03d}"
-        duplicates[base] = duplicates.get(base, 0) + 1
-        suffix = f" [{duplicates[base]}]" if duplicates[base] > 1 else ""
+        duplicate_key = canonical_text(base)
+        duplicates[duplicate_key] = duplicates.get(duplicate_key, 0) + 1
+        suffix = f" [{duplicates[duplicate_key]}]" if duplicates[duplicate_key] > 1 else ""
         headers.append(base + suffix)
     return headers
 
@@ -171,6 +238,23 @@ def classify_entity(raw: str) -> str:
     return "bank"
 
 
+def deduplicate_observations(
+    observations: list[tuple], context: str
+) -> list[tuple]:
+    """Collapse byte-for-byte source duplicates without hiding conflicts."""
+    unique: dict[str, tuple] = {}
+    for observation in observations:
+        observation_id = observation[0]
+        previous = unique.get(observation_id)
+        if previous and previous[14] != observation[14]:
+            raise ValueError(
+                "Aynı dönem/banka/metrik için çelişen iki değer bulundu: "
+                f"{context} {observation[8]} {observation[12]}"
+            )
+        unique[observation_id] = observation
+    return list(unique.values())
+
+
 def iter_sheet_observations(
     period_end: str,
     period_label: str,
@@ -182,9 +266,7 @@ def iter_sheet_observations(
     sheet_key = canonical_text(sheet.name)
     headers = metric_headers(sheet)
     observations: list[tuple] = []
-    entities_loaded = 0
-    values_loaded = 0
-    for row in range(7, sheet.nrows):
+    for row in range(first_data_row(sheet), sheet.nrows):
         raw_entity = str(sheet.cell_value(row, 0) or "")
         entity_name = normalize_space(raw_entity)
         if not entity_name:
@@ -192,7 +274,6 @@ def iter_sheet_observations(
         values = [sheet.cell_value(row, col) for col in range(1, sheet.ncols)]
         if not any(isinstance(value, (int, float)) for value in values):
             continue
-        entities_loaded += 1
         entity_key = canonical_text(entity_name)
         for col, value in enumerate(values, start=1):
             if not isinstance(value, (int, float)):
@@ -224,7 +305,9 @@ def iter_sheet_observations(
                     col + 1,
                 )
             )
-            values_loaded += 1
+    unique_observations = deduplicate_observations(
+        observations, f"{period_label} {sheet.name}"
+    )
     audit = (
         period_end,
         group,
@@ -233,10 +316,10 @@ def iter_sheet_observations(
         sheet_key,
         sheet.nrows,
         sheet.ncols,
-        entities_loaded,
-        values_loaded,
+        len({observation[10] for observation in unique_observations}),
+        len(unique_observations),
     )
-    return observations, audit
+    return unique_observations, audit
 
 
 def load_period(folder: Path) -> tuple[list[tuple], list[tuple]]:
@@ -247,7 +330,7 @@ def load_period(folder: Path) -> tuple[list[tuple], list[tuple]]:
         group = source_group(path)
         if not group:
             continue
-        book = xlrd.open_workbook(path, on_demand=True, formatting_info=False)
+        book = xlrd.open_workbook(path, on_demand=True, formatting_info=True)
         try:
             for sheet in book.sheets():
                 if sheet.ncols < 2 or not report_title(sheet):
@@ -259,22 +342,34 @@ def load_period(folder: Path) -> tuple[list[tuple], list[tuple]]:
                 audits.append(audit)
         finally:
             book.release_resources()
-    unique: dict[str, tuple] = {}
-    for observation in observations:
-        observation_id = observation[0]
-        previous = unique.get(observation_id)
-        if previous and previous[14] != observation[14]:
-            raise ValueError(
-                "Aynı dönem/banka/metrik için çelişen iki değer bulundu: "
-                f"{folder.name} {observation[8]} {observation[12]}"
-            )
-        unique[observation_id] = observation
-    return list(unique.values()), audits
+    return deduplicate_observations(observations, folder.name), audits
 
 
 def chunked(rows: list[tuple], size: int = 10_000) -> Iterator[list[tuple]]:
     for start in range(0, len(rows), size):
         yield rows[start : start + size]
+
+
+def availability_status(
+    period: str,
+    group: str,
+    sheet_key: str,
+    present: set[tuple[str, str, str]],
+    published_months: dict[tuple[str, str], set[str]],
+    first_published: dict[tuple[str, str], str],
+    summary_available: set[tuple[str, str, str]],
+) -> str:
+    key = (group, sheet_key)
+    period_key = (period, group, sheet_key)
+    if period_key in present:
+        return "present"
+    if period < first_published[key]:
+        return "not_yet_published"
+    if period[5:7] not in published_months[key]:
+        return "not_published_for_quarter"
+    if period_key in summary_available:
+        return "summary_available"
+    return "missing"
 
 
 def rebuild_schema_audit(connection: sqlite3.Connection) -> None:
@@ -303,20 +398,28 @@ def rebuild_schema_audit(connection: sqlite3.Connection) -> None:
         published_months.setdefault((group, sheet_key), set()).add(period[5:7])
         key = (group, sheet_key)
         first_published[key] = min(period, first_published.get(key, period))
+    summary_available = {
+        (period, group, sheet_key)
+        for (group, sheet_key), metric_key in SUMMARY_FALLBACK_METRICS.items()
+        for (period,) in connection.execute(
+            "SELECT DISTINCT period_end FROM observations WHERE metric_key = ?",
+            (metric_key,),
+        )
+    }
     rows = [
         (
             period,
             group,
             sheet_name,
             sheet_key,
-            (
-                "present"
-                if (period, group, sheet_key) in present
-                else "not_yet_published"
-                if period < first_published[(group, sheet_key)]
-                else "missing"
-                if period[5:7] in published_months[(group, sheet_key)]
-                else "not_published_for_quarter"
+            availability_status(
+                period,
+                group,
+                sheet_key,
+                present,
+                published_months,
+                first_published,
+                summary_available,
             ),
         )
         for period in periods
@@ -384,10 +487,15 @@ def ingest(raw_dir: Path, database: Path) -> None:
             "SELECT COUNT(*) FROM schema_audit "
             "WHERE status='not_yet_published'"
         ).fetchone()[0]
+        summary_available = connection.execute(
+            "SELECT COUNT(*) FROM schema_audit "
+            "WHERE status='summary_available'"
+        ).fetchone()[0]
     print(
         f"Tamamlandı: {observations:,} gözlem, {periods} dönem, "
         f"{missing} gerçek eksik, {not_published} dönemsel yayımlanmayan, "
-        f"{not_yet_published} henüz yürürlükte olmayan sayfa kaydı -> {database}"
+        f"{not_yet_published} henüz yürürlükte olmayan, "
+        f"{summary_available} özet metriği bulunan sayfa kaydı -> {database}"
     )
 
 

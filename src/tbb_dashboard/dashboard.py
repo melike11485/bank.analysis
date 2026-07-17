@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import sqlite3
 from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+
+from src.tbb_dashboard.labels import SHEET_LABELS, metric_display_label
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -21,6 +24,13 @@ SOURCE_LABELS = {
 }
 ENTITY_LABELS = {"bank": "Bankalar", "group": "Banka Grupları"}
 COLORS = ["#082F57", "#0F4C81", "#1769AA", "#2F80D1", "#5FA8E8", "#87BFF0"]
+SOURCE_AVAILABILITY_NOTES = {
+    ("pasifler", "ser_benz", "summary_available"): (
+        "Ayrıntılı Ser.Benz. sayfası kaynak dönemde yayımlanmamış; toplam değer "
+        "Yükümlülükler → Diğer Pasifler → Sermaye Benzeri Borçlanma Araçları "
+        "metriğinde mevcuttur."
+    ),
+}
 
 
 def query(sql: str, params: tuple = ()) -> pd.DataFrame:
@@ -52,6 +62,21 @@ def load_series(metric_key: str, entity_type: str) -> pd.DataFrame:
         ORDER BY period_end, entity_name
         """,
         (metric_key, entity_type),
+    )
+
+
+@st.cache_data(show_spinner=False)
+def load_schema_availability(source_group: str, sheet_key: str) -> pd.DataFrame:
+    return query(
+        """
+        SELECT audit.period_end, MAX(obs.period_label) AS period_label, audit.status
+        FROM schema_audit AS audit
+        LEFT JOIN observations AS obs ON obs.period_end = audit.period_end
+        WHERE audit.source_group = ? AND audit.sheet_key = ?
+        GROUP BY audit.period_end, audit.status
+        ORDER BY audit.period_end
+        """,
+        (source_group, sheet_key),
     )
 
 
@@ -122,12 +147,12 @@ def evaluate_formula(
 
 
 def reset_filter_dependents(namespace: str) -> None:
-    st.session_state.pop(f"{namespace}_sheet", None)
-    st.session_state.pop(f"{namespace}_metric", None)
+    st.session_state[f"{namespace}_sheet"] = None
+    st.session_state[f"{namespace}_metric"] = None
 
 
 def reset_metric(namespace: str) -> None:
-    st.session_state.pop(f"{namespace}_metric", None)
+    st.session_state[f"{namespace}_metric"] = None
 
 
 def sync_entity_filter(
@@ -165,31 +190,80 @@ def render_metric_filters(namespace: str, catalog: pd.DataFrame) -> dict | None:
             .set_index("sheet_key")["sheet_name"]
             .to_dict()
         )
+        sheet_lookup = {
+            key: SHEET_LABELS.get((source, key), original_name)
+            for key, original_name in sheet_lookup.items()
+        }
+        sheet_state_key = f"{namespace}_sheet"
+        if (
+            sheet_state_key in st.session_state
+            and st.session_state[sheet_state_key] is not None
+            and st.session_state[sheet_state_key] not in sheet_options
+        ):
+            st.session_state[sheet_state_key] = None
+        sheet_index = (
+            sheet_options.index(default_sheet)
+            if sheet_state_key not in st.session_state
+            else None
+        )
         sheet = sheet_col.selectbox(
             "Sayfa adı",
             sheet_options,
-            index=sheet_options.index(default_sheet),
+            index=sheet_index,
             format_func=lambda item: sheet_lookup[item],
-            key=f"{namespace}_sheet",
+            key=sheet_state_key,
             on_change=reset_metric,
             args=(namespace,),
+            placeholder="Veri seçiniz",
         )
-        metric_catalog = source_catalog[source_catalog["sheet_key"] == sheet]
-        metric_options = metric_catalog["metric_key"].drop_duplicates().tolist()
-        preferred = f"{source}.{sheet}.toplam_aktifler"
-        default_metric = preferred if preferred in metric_options else metric_options[0]
-        metric_lookup = (
-            metric_catalog.drop_duplicates("metric_key")
-            .set_index("metric_key")["metric_path"]
-            .to_dict()
-        )
-        metric_key = metric_col.selectbox(
-            "Finansal metrik",
-            metric_options,
-            index=metric_options.index(default_metric),
-            format_func=lambda item: metric_lookup[item],
-            key=f"{namespace}_metric",
-        )
+        metric_state_key = f"{namespace}_metric"
+        metric_catalog = source_catalog.iloc[0:0].copy()
+        metric_lookup: dict[str, str] = {}
+        if sheet is None:
+            st.session_state[metric_state_key] = None
+            metric_key = metric_col.selectbox(
+                "Finansal metrik",
+                [],
+                index=None,
+                key=metric_state_key,
+                placeholder="Veri seçiniz",
+                disabled=True,
+            )
+        else:
+            metric_catalog = source_catalog[source_catalog["sheet_key"] == sheet]
+            metric_options = metric_catalog["metric_key"].drop_duplicates().tolist()
+            preferred = f"{source}.{sheet}.toplam_aktifler"
+            default_metric = (
+                preferred if preferred in metric_options else metric_options[0]
+            )
+            metric_lookup = (
+                metric_catalog.drop_duplicates("metric_key")
+                .set_index("metric_key")["metric_path"]
+                .to_dict()
+            )
+            metric_lookup = {
+                key: metric_display_label(key, original_name)
+                for key, original_name in metric_lookup.items()
+            }
+            if (
+                metric_state_key in st.session_state
+                and st.session_state[metric_state_key] is not None
+                and st.session_state[metric_state_key] not in metric_options
+            ):
+                st.session_state[metric_state_key] = None
+            metric_index = (
+                metric_options.index(default_metric)
+                if metric_state_key not in st.session_state
+                else None
+            )
+            metric_key = metric_col.selectbox(
+                "Finansal metrik",
+                metric_options,
+                index=metric_index,
+                format_func=lambda item: metric_lookup[item],
+                key=metric_state_key,
+                placeholder="Veri seçiniz",
+            )
         entity_type = level_col.radio(
             "Karşılaştırma düzeyi",
             list(ENTITY_LABELS),
@@ -197,6 +271,12 @@ def render_metric_filters(namespace: str, catalog: pd.DataFrame) -> dict | None:
             horizontal=True,
             key=f"{namespace}_entity_type",
         )
+    if sheet is None:
+        st.info("Devam etmek için sayfa adı seçin.")
+        return None
+    if metric_key is None:
+        st.info("Devam etmek için finansal metrik seçin.")
+        return None
     data = load_series(metric_key, entity_type)
     if data.empty:
         st.warning("Bu filtreler için gösterilecek veri bulunamadı.")
@@ -206,6 +286,7 @@ def render_metric_filters(namespace: str, catalog: pd.DataFrame) -> dict | None:
         "period_end"
     )
     period_dates = periods["period_end"].tolist()
+    schema_availability = load_schema_availability(source, sheet)
     return {
         "source": source,
         "sheet": sheet,
@@ -219,6 +300,7 @@ def render_metric_filters(namespace: str, catalog: pd.DataFrame) -> dict | None:
         "period_dates": period_dates,
         "period_labels": dict(zip(periods["period_end"], periods["period_label"])),
         "all_entities": sorted(data["entity_name"].dropna().unique()),
+        "schema_availability": schema_availability,
     }
 
 
@@ -254,19 +336,21 @@ def render_entity_filter(
         name for name in all_entities if name not in set(ascending_value_order)
     )
     default_entities = value_order[:default_count]
-    selection_key = f"{namespace}_entity_selection_{entity_type}_{metric_key}"
+    selection_key = f"{namespace}_entity_selection_{entity_type}"
+    legacy_selection_key = (
+        f"{namespace}_entity_selection_{entity_type}_{metric_key}"
+    )
     if selection_key not in st.session_state:
-        st.session_state[selection_key] = default_entities
-    st.session_state[selection_key] = [
-        name for name in st.session_state[selection_key] if name in all_entities
-    ]
-    entity_ids = {name: index for index, name in enumerate(all_entities)}
+        st.session_state[selection_key] = list(
+            st.session_state.get(legacy_selection_key, default_entities)
+        )
+    st.session_state[selection_key] = list(
+        dict.fromkeys(st.session_state[selection_key])
+    )
 
     def checkbox_key(entity_name: str) -> str:
-        return (
-            f"{namespace}_entity_checkbox_{entity_type}_{metric_key}_"
-            f"{entity_ids[entity_name]}"
-        )
+        entity_id = hashlib.sha1(entity_name.encode("utf-8")).hexdigest()[:12]
+        return f"{namespace}_entity_checkbox_{entity_type}_{entity_id}"
 
     selected_count = len(st.session_state[selection_key])
     label = f"Banka/kurum filtresi • {selected_count} seçili"
@@ -275,7 +359,7 @@ def render_entity_filter(
         search = st.text_input(
             "Ara",
             placeholder="Banka veya kurum adını yazın",
-            key=f"{namespace}_entity_search_{entity_type}_{metric_key}",
+            key=f"{namespace}_entity_search_{entity_type}",
         )
         sort_choice = st.selectbox(
             "Sırala",
@@ -285,18 +369,18 @@ def render_entity_filter(
                 "A–Z",
                 "Z–A",
             ],
-            key=f"{namespace}_entity_sort_{entity_type}_{metric_key}",
+            key=f"{namespace}_entity_sort_{entity_type}",
         )
         action_a, action_b = st.columns(2)
         primary_label = f"İlk {exact_count}'yi seç" if exact_count else "Tümünü seç"
         primary_clicked = action_a.button(
             primary_label,
-            key=f"{namespace}_entity_primary_{entity_type}_{metric_key}",
+            key=f"{namespace}_entity_primary_{entity_type}",
             use_container_width=True,
         )
         clear_clicked = action_b.button(
             "Seçimi temizle",
-            key=f"{namespace}_entity_clear_{entity_type}_{metric_key}",
+            key=f"{namespace}_entity_clear_{entity_type}",
             use_container_width=True,
         )
         if primary_clicked or clear_clicked:
@@ -323,8 +407,14 @@ def render_entity_filter(
         if search.strip():
             search_text = search.casefold().strip()
             displayed = [name for name in displayed if search_text in name.casefold()]
+        selected_available = [
+            name
+            for name in st.session_state[selection_key]
+            if name in set(all_entities)
+        ]
         st.caption(
             f"{len(st.session_state[selection_key])} seçili • "
+            f"{len(selected_available)} tanesi bu metrikte mevcut • "
             f"{len(displayed)} seçenek gösteriliyor"
         )
         with st.container(height=340):
@@ -350,6 +440,12 @@ def render_entity_filter(
         ordered = value_order
     selected = set(st.session_state[selection_key])
     entities = [name for name in ordered if name in selected]
+    unavailable_count = len(selected) - len(entities)
+    if unavailable_count:
+        st.caption(
+            f"Seçiminiz korundu; {unavailable_count} banka/kurum için "
+            "bu metrikte veri bulunmuyor."
+        )
     if exact_count and len(entities) != exact_count:
         st.warning(f"Bu analiz için tam olarak {exact_count} banka/kurum seçin.")
     else:
@@ -403,6 +499,21 @@ def render_quality(
     else:
         st.success(success_text)
         st.caption("Eksik kayıt listesi boş: seçilen kapsam eksiksiz.")
+
+
+def render_source_availability_notes(context: dict) -> None:
+    availability = context["schema_availability"]
+    notes = availability[availability["status"] == "summary_available"]
+    if notes.empty:
+        return
+    st.markdown("##### Kaynak kapsam notları")
+    note = SOURCE_AVAILABILITY_NOTES.get(
+        (context["source"], context["sheet"], "summary_available"),
+        "Ayrıntılı sayfa yayımlanmamış; ilgili özet metrik başka bir kaynak "
+        "sayfada mevcuttur.",
+    )
+    for row in notes.itertuples(index=False):
+        st.info(f"{row.period_label}: {note}")
 
 
 def make_time_figure(
@@ -538,6 +649,72 @@ st.markdown(
     [data-baseweb="select"] > div:focus-within, [data-testid="stTextInput"] input:focus {
         border-color: var(--blue-500); box-shadow: 0 0 0 2px rgba(47,128,209,.14);
     }
+    /* Seçim kutusundaki yanıp sönen arama imlecini ve açılır liste
+       geçişlerini kapat. Klavyeyle arama ve seçim davranışı korunur. */
+    input[role="combobox"] {
+        caret-color: transparent !important;
+        animation: none !important;
+        transition: none !important;
+    }
+    [data-testid="stSelectboxVirtualDropdown"],
+    [data-testid="stSelectboxVirtualDropdown"] *,
+    [data-baseweb="popover"] {
+        animation: none !important;
+        transition: none !important;
+    }
+    /* Uzun açılır liste seçeneklerini kesmeden yatay kaydırmayla göster. */
+    [data-testid="stSelectboxVirtualDropdown"] {
+        overflow-x: scroll !important;
+        overflow-y: scroll !important;
+        scrollbar-gutter: stable both-edges !important;
+        scrollbar-width: auto;
+        scrollbar-color: var(--blue-500) #e6f0f8;
+    }
+    [data-testid="stSelectboxVirtualDropdown"] [role="listbox"] {
+        overflow-x: auto !important;
+        scrollbar-gutter: stable both-edges !important;
+        scrollbar-color: var(--blue-500) #e6f0f8;
+    }
+    [data-testid="stSelectboxVirtualDropdown"] [role="listbox"] > [role="presentation"] {
+        min-width: 100% !important;
+        width: max-content !important;
+    }
+    [data-testid="stSelectboxVirtualDropdown"] [role="listbox"] > [role="presentation"] > [role="presentation"] {
+        width: max-content !important;
+        min-width: 100% !important;
+        contain: layout style !important;
+    }
+    [data-testid="stSelectboxVirtualDropdown"] [role="option"] {
+        width: max-content !important;
+        min-width: max-content !important;
+        white-space: nowrap !important;
+    }
+    [data-testid="stSelectboxVirtualDropdown"] [role="option"] * {
+        white-space: nowrap !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+    }
+    [data-testid="stSelectboxVirtualDropdown"]::-webkit-scrollbar,
+    [data-testid="stSelectboxVirtualDropdown"] *::-webkit-scrollbar {
+        width: 10px !important;
+        height: 10px !important;
+        background: #e6f0f8 !important;
+    }
+    [data-testid="stSelectboxVirtualDropdown"]::-webkit-scrollbar-track,
+    [data-testid="stSelectboxVirtualDropdown"] *::-webkit-scrollbar-track {
+        background: #e6f0f8 !important;
+        border-radius: 999px !important;
+    }
+    [data-testid="stSelectboxVirtualDropdown"]::-webkit-scrollbar-thumb,
+    [data-testid="stSelectboxVirtualDropdown"] *::-webkit-scrollbar-thumb {
+        background: var(--blue-500) !important;
+        border: 2px solid #e6f0f8 !important;
+        border-radius: 999px !important;
+    }
+    [data-testid="stSelectboxVirtualDropdown"]::-webkit-scrollbar-corner,
+    [data-testid="stSelectboxVirtualDropdown"] *::-webkit-scrollbar-corner {
+        background: #e6f0f8 !important;
+    }
     [data-testid="stPopover"] > button {
         width: 100%; min-height: 44px; justify-content: space-between;
         border: 1px solid #bcd3e7; border-radius: 10px; background: #fbfdff;
@@ -591,7 +768,8 @@ calculator_catalog = catalog.drop_duplicates("metric_key").copy()
 calculator_catalog["display_name"] = calculator_catalog.apply(
     lambda row: (
         f"{SOURCE_LABELS.get(row['source_group'], row['source_group'])} / "
-        f"{row['sheet_name']} / {row['metric_path']}"
+        f"{SHEET_LABELS.get((row['source_group'], row['sheet_key']), row['sheet_name'])} / "
+        f"{metric_display_label(row['metric_key'], row['metric_path'])}"
     ),
     axis=1,
 )
@@ -673,7 +851,7 @@ with period_tab:
                     figure.update_xaxes(tickangle=-25)
                     figure.update_layout(coloraxis_showscale=False)
                 figure.update_layout(height=500, plot_bgcolor="white", paper_bgcolor="white")
-                st.plotly_chart(figure, width="stretch")
+                st.plotly_chart(figure, width="stretch", key="period_single_chart")
         with top_ten_tab:
             top_ten = ranking_all.head(10).sort_values("value")
             if chart_type == "Daire":
@@ -713,7 +891,11 @@ with period_tab:
                 plot_bgcolor="white",
                 paper_bgcolor="white",
             )
-            st.plotly_chart(top_figure, width="stretch")
+            st.plotly_chart(
+                top_figure,
+                width="stretch",
+                key="period_top_ten_chart",
+            )
         period_table = ranking_all[["Sıra", "entity_name", "value", "unit"]].rename(
             columns={"entity_name": "Banka / kurum", "value": "Değer", "unit": "Birim"}
         )
@@ -734,6 +916,7 @@ with period_tab:
                 "Bu dönemde tüm banka/kurumlar için veri mevcut.",
                 "period",
             )
+            render_source_availability_notes(context)
 
 
 with time_tab:
@@ -809,7 +992,7 @@ with time_tab:
                     color_discrete_sequence=COLORS,
                 )
                 figure.update_layout(height=580)
-                st.plotly_chart(figure, width="stretch")
+                st.plotly_chart(figure, width="stretch", key="time_trend_chart")
             else:
                 figure = make_time_figure(
                     comparison_data,
@@ -820,7 +1003,7 @@ with time_tab:
                     context["period_labels"],
                     end_date,
                 )
-                st.plotly_chart(figure, width="stretch")
+                st.plotly_chart(figure, width="stretch", key="time_trend_chart")
         for tab, column, label, empty_text in (
             (
                 quarterly_tab,
@@ -848,7 +1031,11 @@ with time_tab:
                 if figure is None:
                     st.info(empty_text)
                 else:
-                    st.plotly_chart(figure, width="stretch")
+                    st.plotly_chart(
+                        figure,
+                        width="stretch",
+                        key=f"time_{column}_chart",
+                    )
         comparison = endpoints.pivot_table(
             index="entity_name", columns="period_end", values="value", aggfunc="first"
         ).reindex(entities)
@@ -885,7 +1072,11 @@ with time_tab:
             if endpoint_figure is None:
                 st.info("Başlangıç–bitiş karşılaştırması için veri bulunamadı.")
             else:
-                st.plotly_chart(endpoint_figure, width="stretch")
+                st.plotly_chart(
+                    endpoint_figure,
+                    width="stretch",
+                    key="time_endpoint_chart",
+                )
             st.dataframe(
                 summary,
                 width="stretch",
@@ -939,6 +1130,7 @@ with time_tab:
                 "Seçilen zaman aralığında eksik banka/kurum-dönem kaydı yok.",
                 "time",
             )
+            render_source_availability_notes(context)
 
 
 with calculator_tab:
@@ -1147,7 +1339,11 @@ with calculator_tab:
                         st.warning(
                             f"Sıfır paydalı {zero_denominators} hesaplama boş bırakıldı."
                         )
-                    st.plotly_chart(figure, width="stretch")
+                    st.plotly_chart(
+                        figure,
+                        width="stretch",
+                        key="calculator_result_chart",
+                    )
 
         calculator_columns = [
             "period_label",
