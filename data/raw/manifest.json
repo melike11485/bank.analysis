@@ -1,0 +1,1352 @@
+[
+  {
+    "period": "2020-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/50937/field_raporlar_ekler/275009",
+    "local_path": "data/raw/2020-03/1.Mali_bunye.xls",
+    "sha256": "55945156174d5e185dcb0a664280631899c972bb8e70cda8bf30acdd5989505d",
+    "size_bytes": 159232,
+    "status": "existing"
+  },
+  {
+    "period": "2020-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/50937/field_raporlar_ekler/275008",
+    "local_path": "data/raw/2020-03/2.Aktifler.xls",
+    "sha256": "f9be71440cf748d2a182b7c107fd66c8555ae678fa0244c4bcec567c3a34afcb",
+    "size_bytes": 215040,
+    "status": "existing"
+  },
+  {
+    "period": "2020-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/50937/field_raporlar_ekler/275007",
+    "local_path": "data/raw/2020-03/3.Pasifler.xls",
+    "sha256": "5015c0df1400b195239646c4ad7ef930503dd9d60b24c97a0e6f36d926a104a2",
+    "size_bytes": 146944,
+    "status": "existing"
+  },
+  {
+    "period": "2020-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/50937/field_raporlar_ekler/275011",
+    "local_path": "data/raw/2020-03/4.Gelir-Gider.xls",
+    "sha256": "77382d1379531b43948a5ab29c0ea897a0a679e3eb297f479270b9ea29bfe7f2",
+    "size_bytes": 117760,
+    "status": "existing"
+  },
+  {
+    "period": "2020-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/50937/field_raporlar_ekler/275006",
+    "local_path": "data/raw/2020-03/5.Nazim.xls",
+    "sha256": "b10a1e0e123a9609cc87127ba952b32f6d223b6565ed99be75662a9555a86b41",
+    "size_bytes": 58880,
+    "status": "existing"
+  },
+  {
+    "period": "2020-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/50937/field_raporlar_ekler/275005",
+    "local_path": "data/raw/2020-03/Aciklamalar.xls",
+    "sha256": "bf52794d168b309a8f91fa49d9a7e96fbbf999970391a426aac7ec7dc0a3be13",
+    "size_bytes": 86528,
+    "status": "existing"
+  },
+  {
+    "period": "2020-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/50951/field_raporlar_ekler/275317",
+    "local_path": "data/raw/2020-06/1.Mali_bunye.xls",
+    "sha256": "a506484120e14152a09b2436f2ab933b34b1a485295b6216be717858ad87351c",
+    "size_bytes": 144896,
+    "status": "existing"
+  },
+  {
+    "period": "2020-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/50951/field_raporlar_ekler/275316",
+    "local_path": "data/raw/2020-06/2.Aktifler.xls",
+    "sha256": "bf94bb402f7d0268d128c69d7d9a15af40a96fd2f562ac48ee58c8cb57568ae7",
+    "size_bytes": 198144,
+    "status": "existing"
+  },
+  {
+    "period": "2020-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/50951/field_raporlar_ekler/275315",
+    "local_path": "data/raw/2020-06/3.Pasifler.xls",
+    "sha256": "4df99eabafc7edbf01d30b838cf175632dc1fb5cb37a09e509dafee2090f1155",
+    "size_bytes": 132608,
+    "status": "existing"
+  },
+  {
+    "period": "2020-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/50951/field_raporlar_ekler/275314",
+    "local_path": "data/raw/2020-06/4.Gelir-Gider.xls",
+    "sha256": "63f4f493bfbbdb2f2faf1ddebb62d5d199e3553e34a6649a9baca53f7cafd51f",
+    "size_bytes": 118272,
+    "status": "existing"
+  },
+  {
+    "period": "2020-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/50951/field_raporlar_ekler/275313",
+    "local_path": "data/raw/2020-06/5.Nazim.xls",
+    "sha256": "238ce476f55759f1b50624c65b46bdaf675f36d0f983d9dbb25cf179793a200e",
+    "size_bytes": 56320,
+    "status": "existing"
+  },
+  {
+    "period": "2020-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/50951/field_raporlar_ekler/275312",
+    "local_path": "data/raw/2020-06/Aciklamalar.xls",
+    "sha256": "a92486e78ebc7295a8f543291de703eda94309c102d802b61e0ab186ace4250e",
+    "size_bytes": 80384,
+    "status": "existing"
+  },
+  {
+    "period": "2020-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/50966/field_raporlar_ekler/275569",
+    "local_path": "data/raw/2020-09/1.Mali_bunye.xls",
+    "sha256": "969e35d7742871329b891258872ab2d8b78a1b0a794c71b78bdaf0150049949d",
+    "size_bytes": 145920,
+    "status": "existing"
+  },
+  {
+    "period": "2020-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/50966/field_raporlar_ekler/275568",
+    "local_path": "data/raw/2020-09/2.Aktifler.xls",
+    "sha256": "b2a7e4a2b8e9e6ddff7079ff176704a61fa2c176df0a874da0f93b6629641d47",
+    "size_bytes": 198656,
+    "status": "existing"
+  },
+  {
+    "period": "2020-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/50966/field_raporlar_ekler/275567",
+    "local_path": "data/raw/2020-09/3.Pasifler.xls",
+    "sha256": "4e3b61c93bbfe79d71e678739c485fc832612bec61449501d3f927739e3f67ca",
+    "size_bytes": 132608,
+    "status": "existing"
+  },
+  {
+    "period": "2020-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/50966/field_raporlar_ekler/275566",
+    "local_path": "data/raw/2020-09/4.Gelir-Gider.xls",
+    "sha256": "dd715095b81597b0b650a204c958e4b40489bed95b7bf0832966198e2d67b161",
+    "size_bytes": 118784,
+    "status": "existing"
+  },
+  {
+    "period": "2020-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/50966/field_raporlar_ekler/275565",
+    "local_path": "data/raw/2020-09/5.Nazim.xls",
+    "sha256": "7a959c732c25e8d79a34eb67ae52715c37c24499293ed7bbde4e88ac9ebea4c3",
+    "size_bytes": 56320,
+    "status": "existing"
+  },
+  {
+    "period": "2020-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/50966/field_raporlar_ekler/275564",
+    "local_path": "data/raw/2020-09/Aciklamalar.xls",
+    "sha256": "4ba2a6ab17bfb00284dbeb94962b4a3154aa4ed78b88fbdeff08081f5a37ac21",
+    "size_bytes": 80384,
+    "status": "existing"
+  },
+  {
+    "period": "2020-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51064/field_raporlar_ekler/276126",
+    "local_path": "data/raw/2020-12/1.Mali_bunye.xls",
+    "sha256": "957ff97e2338705c3f5c060f593673daa213c7a1aef9f62181e9df9fca689284",
+    "size_bytes": 318976,
+    "status": "existing"
+  },
+  {
+    "period": "2020-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51064/field_raporlar_ekler/276125",
+    "local_path": "data/raw/2020-12/2.Aktifler.xls",
+    "sha256": "0ff173934bb35b974b1d19e4d48f086236b8d9289f76431f7335615b2dbdd01a",
+    "size_bytes": 200192,
+    "status": "existing"
+  },
+  {
+    "period": "2020-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51064/field_raporlar_ekler/276124",
+    "local_path": "data/raw/2020-12/3.Pasifler.xls",
+    "sha256": "c3211c91070706667e5ea7d3959da194f3ac96b296b2c806f8eb5e6d797bf8b4",
+    "size_bytes": 143872,
+    "status": "existing"
+  },
+  {
+    "period": "2020-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51064/field_raporlar_ekler/276123",
+    "local_path": "data/raw/2020-12/4.Gelir-Gider.xls",
+    "sha256": "0215f14acbd7f6f208d9b29e37fe97036b0d7d971144ee90491d4d6762ef052e",
+    "size_bytes": 119296,
+    "status": "existing"
+  },
+  {
+    "period": "2020-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51064/field_raporlar_ekler/276122",
+    "local_path": "data/raw/2020-12/5.Nazim.xls",
+    "sha256": "6f28a546e3b9f2ecfd8a1b1ba230636e47c3369dcbe2eb44bc73f40f9f0f7ea6",
+    "size_bytes": 116224,
+    "status": "existing"
+  },
+  {
+    "period": "2020-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2020-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51064/field_raporlar_ekler/276121",
+    "local_path": "data/raw/2020-12/Aciklamalar.xls",
+    "sha256": "3e0c033bfda45c539712ec679391f92f76aa0b6a9f63a7bbefd3bece01ce2f84",
+    "size_bytes": 80384,
+    "status": "existing"
+  },
+  {
+    "period": "2021-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51084/field_raporlar_ekler/276325",
+    "local_path": "data/raw/2021-03/1.Mali_bunye.xls",
+    "sha256": "c6670394bfbe5388cbe338cfe9c3d3c2934829b19c92accc3448679e9de0b080",
+    "size_bytes": 145920,
+    "status": "existing"
+  },
+  {
+    "period": "2021-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51084/field_raporlar_ekler/276324",
+    "local_path": "data/raw/2021-03/2.Aktifler.xls",
+    "sha256": "b72aa6e2bb26be20bdad99c59a4635b40225d608b23eeeffe281fe98506cf9e9",
+    "size_bytes": 196608,
+    "status": "existing"
+  },
+  {
+    "period": "2021-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51084/field_raporlar_ekler/276323",
+    "local_path": "data/raw/2021-03/3.Pasifler.xls",
+    "sha256": "22e16a0b2db8e6eac781b008224323fa833d9d3efb39c9597775adbc34b8d04d",
+    "size_bytes": 132608,
+    "status": "existing"
+  },
+  {
+    "period": "2021-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51084/field_raporlar_ekler/276322",
+    "local_path": "data/raw/2021-03/4.Gelir-Gider.xls",
+    "sha256": "205744ed7de89cb9906ec2162d69f1f31afc0ab1e84cf6af192f34ebb82388c4",
+    "size_bytes": 117760,
+    "status": "existing"
+  },
+  {
+    "period": "2021-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51084/field_raporlar_ekler/276321",
+    "local_path": "data/raw/2021-03/5.Nazim.xls",
+    "sha256": "0d0b67f247fb9c1c4a900a89c1727a408a1ac09ab7ab9c4befcf373296330b10",
+    "size_bytes": 56320,
+    "status": "existing"
+  },
+  {
+    "period": "2021-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51084/field_raporlar_ekler/276320",
+    "local_path": "data/raw/2021-03/Aciklamalar.xls",
+    "sha256": "a088eacc2b412691550ef91e8758ea46285ba24f399734470a8fe4073b1577c5",
+    "size_bytes": 129024,
+    "status": "existing"
+  },
+  {
+    "period": "2021-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51102/field_raporlar_ekler/276563",
+    "local_path": "data/raw/2021-06/1.Mali_bunye.xls",
+    "sha256": "65747e02a06f1308f6f036658b3c82353b2f8c1e3c0bf3d637de0fb82cc7b639",
+    "size_bytes": 167424,
+    "status": "existing"
+  },
+  {
+    "period": "2021-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51102/field_raporlar_ekler/276562",
+    "local_path": "data/raw/2021-06/2.Aktifler.xls",
+    "sha256": "3c403b6241572ccd8106ab1d006c3adb33d207048a2167c59c22d9feb6930690",
+    "size_bytes": 223744,
+    "status": "existing"
+  },
+  {
+    "period": "2021-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51102/field_raporlar_ekler/276561",
+    "local_path": "data/raw/2021-06/3.Pasifler.xls",
+    "sha256": "e20c84232f46c9ba95f24e1e1a9d95b84b189bd9343d8e5a71f8602dbea1457c",
+    "size_bytes": 154112,
+    "status": "existing"
+  },
+  {
+    "period": "2021-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51102/field_raporlar_ekler/276560",
+    "local_path": "data/raw/2021-06/4.Gelir-Gider.xls",
+    "sha256": "cf5a30b3f7626385298a7803dee2b84425253b0c80c1fcb84f85b3920864af5e",
+    "size_bytes": 136704,
+    "status": "existing"
+  },
+  {
+    "period": "2021-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51102/field_raporlar_ekler/276559",
+    "local_path": "data/raw/2021-06/5.Nazim.xls",
+    "sha256": "2520d6ac7ffc009cc4f86e6291d068e2faec3ea5edc587267d135b4ec629122d",
+    "size_bytes": 60928,
+    "status": "existing"
+  },
+  {
+    "period": "2021-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51102/field_raporlar_ekler/276558",
+    "local_path": "data/raw/2021-06/Aciklamalar.xls",
+    "sha256": "1e999b62cebc897cd2baec34d87c32cb8e366800a5b6c06062bbab2655ab9b74",
+    "size_bytes": 89088,
+    "status": "existing"
+  },
+  {
+    "period": "2021-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51125/field_raporlar_ekler/276918",
+    "local_path": "data/raw/2021-09/1.Mali_bunye.xls",
+    "sha256": "2fb634ef6fbec0482f9a43864c69d770c0706230a37f3ab0a790608707f11497",
+    "size_bytes": 146432,
+    "status": "existing"
+  },
+  {
+    "period": "2021-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51125/field_raporlar_ekler/276921",
+    "local_path": "data/raw/2021-09/2.Aktifler.xls",
+    "sha256": "677d98a18ab0e5bfc691f510f09ae8b13ff8a4f30e87bec3a2cc01710c1b9802",
+    "size_bytes": 199680,
+    "status": "existing"
+  },
+  {
+    "period": "2021-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51125/field_raporlar_ekler/276917",
+    "local_path": "data/raw/2021-09/3.Pasifler.xls",
+    "sha256": "afae037a64e9fc628a00f2e42e530fead2c2fcbd8d599a45aa775c4599bdc5c1",
+    "size_bytes": 133632,
+    "status": "existing"
+  },
+  {
+    "period": "2021-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51125/field_raporlar_ekler/276916",
+    "local_path": "data/raw/2021-09/4.Gelir-Gider.xls",
+    "sha256": "66516954be14435fbca93e52b34a4d23d73955ffb808e27bc833e773a1adf70f",
+    "size_bytes": 119808,
+    "status": "existing"
+  },
+  {
+    "period": "2021-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51125/field_raporlar_ekler/276915",
+    "local_path": "data/raw/2021-09/5.Nazim.xls",
+    "sha256": "688d841efd8ecd168e584f4ad2055f7001dea9ca79b220bba05bcfd3759895eb",
+    "size_bytes": 56832,
+    "status": "existing"
+  },
+  {
+    "period": "2021-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51125/field_raporlar_ekler/276920",
+    "local_path": "data/raw/2021-09/Aciklamalar.xls",
+    "sha256": "918655d2f2919845bc11d6ad4bba011edf2a852de7a53278cf2bedbba02ec564",
+    "size_bytes": 80384,
+    "status": "existing"
+  },
+  {
+    "period": "2021-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51153/field_raporlar_ekler/277333",
+    "local_path": "data/raw/2021-12/1.Mali_bunye.xls",
+    "sha256": "cf525ccb1cbbabbb5d4813c4fb66a13d6dc85893b1677b272385dfc4762d0e60",
+    "size_bytes": 347136,
+    "status": "existing"
+  },
+  {
+    "period": "2021-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51153/field_raporlar_ekler/277332",
+    "local_path": "data/raw/2021-12/2.Aktifler.xls",
+    "sha256": "506dd9fcd0b5898d54ea3db9e0ee298a26ca0713c00fbe4216e771e7fcdf5cf2",
+    "size_bytes": 221184,
+    "status": "existing"
+  },
+  {
+    "period": "2021-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51153/field_raporlar_ekler/277331",
+    "local_path": "data/raw/2021-12/3.Pasifler.xls",
+    "sha256": "800f1a87ce8a5b46b6a8610f60050d9b716e5c65582a7f5426e97c5a7ebff449",
+    "size_bytes": 163328,
+    "status": "existing"
+  },
+  {
+    "period": "2021-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51153/field_raporlar_ekler/277330",
+    "local_path": "data/raw/2021-12/4.Gelir-Gider.xls",
+    "sha256": "800b4296264471f0128246e2cfd229d4ae42188edc739b63f58c88216f209612",
+    "size_bytes": 133120,
+    "status": "existing"
+  },
+  {
+    "period": "2021-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51153/field_raporlar_ekler/277329",
+    "local_path": "data/raw/2021-12/5.Nazim.xls",
+    "sha256": "e865bb7ee3eed3f5bb6210154c93751689273f3a388196cbdf88937c3e2a4778",
+    "size_bytes": 125952,
+    "status": "existing"
+  },
+  {
+    "period": "2021-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2021-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51153/field_raporlar_ekler/277328",
+    "local_path": "data/raw/2021-12/Aciklamalar.xls",
+    "sha256": "d2cdfe50b7da965a998d2f5e62cac00dc75a9963359e8a044ea8e7d6b3e4b404",
+    "size_bytes": 86528,
+    "status": "existing"
+  },
+  {
+    "period": "2022-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51173/field_raporlar_ekler/277586",
+    "local_path": "data/raw/2022-03/1.Mali_bunye.xls",
+    "sha256": "8242261ca9aef2b8829d03e77bf50b65d4d435f0d274ebcb71fa189d04ec3cd9",
+    "size_bytes": 164864,
+    "status": "existing"
+  },
+  {
+    "period": "2022-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51173/field_raporlar_ekler/277585",
+    "local_path": "data/raw/2022-03/2.Aktifler.xls",
+    "sha256": "40e84d71e710996f226d65e40a8fa66d8baa75f3c00e465002a8512fd63a6792",
+    "size_bytes": 218112,
+    "status": "existing"
+  },
+  {
+    "period": "2022-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51173/field_raporlar_ekler/277587",
+    "local_path": "data/raw/2022-03/3.Pasifler.xls",
+    "sha256": "b804a99781c0b8575699d73588e08485e0bd5ec2f39fef41792460debaf9a3f3",
+    "size_bytes": 155648,
+    "status": "existing"
+  },
+  {
+    "period": "2022-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51173/field_raporlar_ekler/277584",
+    "local_path": "data/raw/2022-03/4.Gelir-Gider.xls",
+    "sha256": "a08b1ce45dd840b0e1e41c9fd6cac22a56fe2eb25ca11fdb29ea7ec49e082421",
+    "size_bytes": 134144,
+    "status": "existing"
+  },
+  {
+    "period": "2022-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51173/field_raporlar_ekler/277583",
+    "local_path": "data/raw/2022-03/5.Nazim.xls",
+    "sha256": "0d9b2d2e997461497528fb9a186c3bbd07a0c4c739b6ff1941d82f669861b0f5",
+    "size_bytes": 59904,
+    "status": "existing"
+  },
+  {
+    "period": "2022-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51173/field_raporlar_ekler/277582",
+    "local_path": "data/raw/2022-03/Aciklamalar.xls",
+    "sha256": "6902d693efa46c956363f7c16112a2e3945f5da0cf94a24e761191b203a83dc1",
+    "size_bytes": 86528,
+    "status": "existing"
+  },
+  {
+    "period": "2022-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51197/field_raporlar_ekler/277868",
+    "local_path": "data/raw/2022-06/1.Mali_bunye.xls",
+    "sha256": "d761a06c1d984655a1870d4db0eb568a8546bf6a3552ce79522560df8f538d81",
+    "size_bytes": 165888,
+    "status": "existing"
+  },
+  {
+    "period": "2022-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51197/field_raporlar_ekler/277867",
+    "local_path": "data/raw/2022-06/2.Aktifler.xls",
+    "sha256": "d99c27ec6dbc89aec421bf3057031ed0112fb84d7a46cf5eacd6f094eebd996c",
+    "size_bytes": 221696,
+    "status": "existing"
+  },
+  {
+    "period": "2022-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51197/field_raporlar_ekler/277866",
+    "local_path": "data/raw/2022-06/3.Pasifler.xls",
+    "sha256": "c51f15b39dc6904400664caa3da12af160446af5a9d23b5a110c6af00ea58635",
+    "size_bytes": 151040,
+    "status": "existing"
+  },
+  {
+    "period": "2022-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51197/field_raporlar_ekler/277865",
+    "local_path": "data/raw/2022-06/4.Gelir-Gider.xls",
+    "sha256": "05d9787d3fa62d42c2b30d5535ab5992661e46af79d835f1bf33540322e7f000",
+    "size_bytes": 135168,
+    "status": "existing"
+  },
+  {
+    "period": "2022-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51197/field_raporlar_ekler/277864",
+    "local_path": "data/raw/2022-06/5.Nazim.xls",
+    "sha256": "7c3fa7667c60b61044124938ed742716b2d01e82ed4747da0feb9bcc0537a137",
+    "size_bytes": 60416,
+    "status": "existing"
+  },
+  {
+    "period": "2022-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51197/field_raporlar_ekler/277863",
+    "local_path": "data/raw/2022-06/Aciklamalar.xls",
+    "sha256": "8b7a0169c4fccd4c85e89670dfd42c655078d1081408eec96925cdb122279732",
+    "size_bytes": 87040,
+    "status": "existing"
+  },
+  {
+    "period": "2022-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51221/field_raporlar_ekler/278269",
+    "local_path": "data/raw/2022-09/1.Mali_bunye.xls",
+    "sha256": "a3ad0fe9b1edbbe5e73be90f8c600bb12a2d28d85a28de8ab131e37be8c9e06b",
+    "size_bytes": 158720,
+    "status": "existing"
+  },
+  {
+    "period": "2022-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51221/field_raporlar_ekler/278270",
+    "local_path": "data/raw/2022-09/2.Aktifler.xls",
+    "sha256": "89fb9f4aaa0cb4134358149a8af8346ad6ecc5ac5dea58ac37d9a27a75707f86",
+    "size_bytes": 213504,
+    "status": "existing"
+  },
+  {
+    "period": "2022-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51221/field_raporlar_ekler/278271",
+    "local_path": "data/raw/2022-09/3.Pasifler.xls",
+    "sha256": "c90629610464c28baeef66139c5945eee460d655754930b5ea1fba72ddee7cdc",
+    "size_bytes": 143872,
+    "status": "existing"
+  },
+  {
+    "period": "2022-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51221/field_raporlar_ekler/278272",
+    "local_path": "data/raw/2022-09/4.Gelir-Gider.xls",
+    "sha256": "e4f681d53d63a2661ea16c7f71bd4b81fb981b045f950730a09bd07f03e10f84",
+    "size_bytes": 129024,
+    "status": "existing"
+  },
+  {
+    "period": "2022-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51221/field_raporlar_ekler/278273",
+    "local_path": "data/raw/2022-09/5.Nazim.xls",
+    "sha256": "4588bdd630c2cf18ab3f4664b4034644466804a98e3b63c97647ef407c65e09c",
+    "size_bytes": 58880,
+    "status": "existing"
+  },
+  {
+    "period": "2022-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51221/field_raporlar_ekler/278274",
+    "local_path": "data/raw/2022-09/Aciklamalar.xls",
+    "sha256": "c73b5162d4587be31be926b78321814462f70755bb0f7448d1e2ba595ebf366b",
+    "size_bytes": 84480,
+    "status": "existing"
+  },
+  {
+    "period": "2022-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51248/field_raporlar_ekler/278634",
+    "local_path": "data/raw/2022-12/1.Mali_bunye.xls",
+    "sha256": "53c2874972fa3dc491366006d0b52792d063a48cb3be78e518d689892e219913",
+    "size_bytes": 354816,
+    "status": "existing"
+  },
+  {
+    "period": "2022-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51248/field_raporlar_ekler/278633",
+    "local_path": "data/raw/2022-12/2.Aktifler.xls",
+    "sha256": "a4b37dc89c2b1763d363acf35b52d522349192639f94c5f98369754da49503bc",
+    "size_bytes": 206336,
+    "status": "existing"
+  },
+  {
+    "period": "2022-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51248/field_raporlar_ekler/278632",
+    "local_path": "data/raw/2022-12/3.Pasifler.xls",
+    "sha256": "7076d6d021028103dc5d73925843d5df004d61192f2afb7964c7e4fbd3befe18",
+    "size_bytes": 165376,
+    "status": "existing"
+  },
+  {
+    "period": "2022-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51248/field_raporlar_ekler/278631",
+    "local_path": "data/raw/2022-12/4.Gelir-Gider.xls",
+    "sha256": "7efbb3dcd5e8b6e0f0ce4bd22c813e9d5a26ee198a2db3adba3a510a7624281c",
+    "size_bytes": 123392,
+    "status": "existing"
+  },
+  {
+    "period": "2022-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51248/field_raporlar_ekler/278630",
+    "local_path": "data/raw/2022-12/5.Nazim.xls",
+    "sha256": "4b32c598019f8d10d7a16b36be1e219c0a73f27f39b522fc77f140e63f44a3fd",
+    "size_bytes": 130048,
+    "status": "existing"
+  },
+  {
+    "period": "2022-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2022-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51248/field_raporlar_ekler/278629",
+    "local_path": "data/raw/2022-12/Aciklamalar.xls",
+    "sha256": "7ae26bd4125934c1e3a9fe1e812449fce00d5f946161f4c75499523e6c03f3ba",
+    "size_bytes": 81408,
+    "status": "existing"
+  },
+  {
+    "period": "2023-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51270/field_raporlar_ekler/278847",
+    "local_path": "data/raw/2023-03/1.Mali_bunye.xls",
+    "sha256": "e7e7e5f300433dbcfee0f6152b0266325511c98e977285437ff4a0831cc9152c",
+    "size_bytes": 165888,
+    "status": "existing"
+  },
+  {
+    "period": "2023-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51270/field_raporlar_ekler/278848",
+    "local_path": "data/raw/2023-03/2.Aktifler.xls",
+    "sha256": "96bf26cbb3b4bce30e2e19b5cdd0a3680e5b910b6e8a44787cd55df3efe07c3c",
+    "size_bytes": 219136,
+    "status": "existing"
+  },
+  {
+    "period": "2023-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51270/field_raporlar_ekler/278846",
+    "local_path": "data/raw/2023-03/3.Pasifler.xls",
+    "sha256": "cd005153c8091cc1d14bc43c093ae3570f9dea35a968423904ca397225614c67",
+    "size_bytes": 150528,
+    "status": "existing"
+  },
+  {
+    "period": "2023-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51270/field_raporlar_ekler/278845",
+    "local_path": "data/raw/2023-03/4.Gelir-Gider.xls",
+    "sha256": "25e339c3fdf381902ef29aedac752f21fda2f7c7da2cafb9dff2acc055b338f7",
+    "size_bytes": 134656,
+    "status": "existing"
+  },
+  {
+    "period": "2023-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51270/field_raporlar_ekler/278844",
+    "local_path": "data/raw/2023-03/5.Nazim.xls",
+    "sha256": "a51b7516b882efa48b31d325e622b32465b903c6d6e4602d5b9b3e8ecdb9566d",
+    "size_bytes": 60416,
+    "status": "existing"
+  },
+  {
+    "period": "2023-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51270/field_raporlar_ekler/278843",
+    "local_path": "data/raw/2023-03/Aciklamalar.xls",
+    "sha256": "7edb5a5dd4e2179126f1eaeb59b9fbabeda8a2e8237db5efdf53605f5c7b441b",
+    "size_bytes": 87552,
+    "status": "existing"
+  },
+  {
+    "period": "2023-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51298/field_raporlar_ekler/279321",
+    "local_path": "data/raw/2023-06/1.Mali_bunye.xls",
+    "sha256": "67068ca715479a97d363aceafe499866538564436fbe817d27a8443e3cddef88",
+    "size_bytes": 151040,
+    "status": "existing"
+  },
+  {
+    "period": "2023-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51298/field_raporlar_ekler/279320",
+    "local_path": "data/raw/2023-06/2.Aktifler.xls",
+    "sha256": "ea5b2f0e498d0340e7fbfb20a29609bcd5e7d6bf4588c6a44c35e41b11453a79",
+    "size_bytes": 237568,
+    "status": "existing"
+  },
+  {
+    "period": "2023-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51298/field_raporlar_ekler/279319",
+    "local_path": "data/raw/2023-06/3.Pasifler.xls",
+    "sha256": "cfeb80c35ae2ffe5b819b130b4c89fcdedc65db7fc36ed1ea4fd284f0a837966",
+    "size_bytes": 136192,
+    "status": "existing"
+  },
+  {
+    "period": "2023-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51298/field_raporlar_ekler/279318",
+    "local_path": "data/raw/2023-06/4.Gelir-Gider.xls",
+    "sha256": "4f0ce75b3550a81df02abcec166873fcf14e224eaffb611690fc5379a9326938",
+    "size_bytes": 123392,
+    "status": "existing"
+  },
+  {
+    "period": "2023-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51298/field_raporlar_ekler/279317",
+    "local_path": "data/raw/2023-06/5.Nazim.xls",
+    "sha256": "86f85dc2a9fd04936eafbc5422464408fbdac36f61d1dc89e2c1545b2f626f90",
+    "size_bytes": 57344,
+    "status": "existing"
+  },
+  {
+    "period": "2023-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51298/field_raporlar_ekler/279316",
+    "local_path": "data/raw/2023-06/Aciklamalar.xls",
+    "sha256": "b5238d1fdf5af8e5f6b1aee527eacd848b1ac8fe092cb48f97b90299f9cf0432",
+    "size_bytes": 81408,
+    "status": "existing"
+  },
+  {
+    "period": "2023-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51316/field_raporlar_ekler/279590",
+    "local_path": "data/raw/2023-09/1.Mali_bunye.xls",
+    "sha256": "5701da8b97648df7ade0bb1ef0484121b4e3ce61f8c5055bcd396e98a96205cf",
+    "size_bytes": 167424,
+    "status": "existing"
+  },
+  {
+    "period": "2023-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51316/field_raporlar_ekler/279591",
+    "local_path": "data/raw/2023-09/2.Aktifler.xls",
+    "sha256": "94d33cfa04d994039676f9da734679cc19be89a933bc25ea6c4f176c6f61c7a6",
+    "size_bytes": 261120,
+    "status": "existing"
+  },
+  {
+    "period": "2023-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51316/field_raporlar_ekler/279589",
+    "local_path": "data/raw/2023-09/3.Pasifler.xls",
+    "sha256": "8621de82ebfee21a793af561390f6b392d9820cee8147858ad3791688d0e02d4",
+    "size_bytes": 152064,
+    "status": "existing"
+  },
+  {
+    "period": "2023-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51316/field_raporlar_ekler/279588",
+    "local_path": "data/raw/2023-09/4.Gelir-Gider.xls",
+    "sha256": "f7282e37f85d499a16c1131ae1f300c7281573bbbb92ab2856faf99629997224",
+    "size_bytes": 137216,
+    "status": "existing"
+  },
+  {
+    "period": "2023-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51316/field_raporlar_ekler/279587",
+    "local_path": "data/raw/2023-09/5.Nazim.xls",
+    "sha256": "9a2d417eccbab51b586b89d24a30869977fcf98fa6f8e32d457f4ee6aae0b398",
+    "size_bytes": 60928,
+    "status": "existing"
+  },
+  {
+    "period": "2023-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51316/field_raporlar_ekler/279586",
+    "local_path": "data/raw/2023-09/Aciklamalar.xls",
+    "sha256": "fbc7ef30aefed15e44538c4993b864c3e1329139f7a57577f3091c8c332b769d",
+    "size_bytes": 87552,
+    "status": "existing"
+  },
+  {
+    "period": "2023-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51350/field_raporlar_ekler/280038",
+    "local_path": "data/raw/2023-12/1.Mali_bunye.xls",
+    "sha256": "98a18fa911f188bd3410323c611fe05f5f6f6d7f93c9c289269b39a96d5581c9",
+    "size_bytes": 359936,
+    "status": "existing"
+  },
+  {
+    "period": "2023-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51350/field_raporlar_ekler/280037",
+    "local_path": "data/raw/2023-12/2.Aktifler.xls",
+    "sha256": "72f69b6cf1bf676187ebaee40ab1666f335127b4e263957908f251fbdf6c4369",
+    "size_bytes": 265728,
+    "status": "existing"
+  },
+  {
+    "period": "2023-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51350/field_raporlar_ekler/280036",
+    "local_path": "data/raw/2023-12/3.Pasifler.xls",
+    "sha256": "73589d541b41d63f3f7f75817a06805cbe2b16cfd584e86d84a444e3043af7bb",
+    "size_bytes": 166400,
+    "status": "existing"
+  },
+  {
+    "period": "2023-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51350/field_raporlar_ekler/280035",
+    "local_path": "data/raw/2023-12/4.Gelir-Gider.xls",
+    "sha256": "669ed5c10b4371fc9b5e7d2dd6ad0ae3efb78e40eef180dd1e15fcce35388cd4",
+    "size_bytes": 138240,
+    "status": "existing"
+  },
+  {
+    "period": "2023-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51350/field_raporlar_ekler/280034",
+    "local_path": "data/raw/2023-12/5.Nazim.xls",
+    "sha256": "924ce0b59c6475f0570c3dde344c9dd37d327203e7838d8ffd49235d6e36caee",
+    "size_bytes": 131072,
+    "status": "existing"
+  },
+  {
+    "period": "2023-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2023-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51350/field_raporlar_ekler/280033",
+    "local_path": "data/raw/2023-12/Aciklamalar.xls",
+    "sha256": "fac58747514db81fee97f3860f47c22c463ac0331fa3bf26a096c82fd8c3ec2a",
+    "size_bytes": 87552,
+    "status": "existing"
+  },
+  {
+    "period": "2024-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51367/field_raporlar_ekler/280314",
+    "local_path": "data/raw/2024-03/1.Mali_bunye.xls",
+    "sha256": "70a7e37e52289ce3e4ca1c4c7d9aaea7cebcb676207bc87dbb6260d773320417",
+    "size_bytes": 170496,
+    "status": "existing"
+  },
+  {
+    "period": "2024-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51367/field_raporlar_ekler/280313",
+    "local_path": "data/raw/2024-03/2.Aktifler.xls",
+    "sha256": "29bb5fdc512eafcbde04e485a6fde254a326c254a8721febcb0d0bfc7bb0bb5a",
+    "size_bytes": 265216,
+    "status": "existing"
+  },
+  {
+    "period": "2024-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51367/field_raporlar_ekler/280312",
+    "local_path": "data/raw/2024-03/3.Pasifler.xls",
+    "sha256": "80fc4ed6c4d90808321b3f9959a7a39b0e9b6af8eca7c2dc56aa08956e56bb26",
+    "size_bytes": 152064,
+    "status": "existing"
+  },
+  {
+    "period": "2024-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51367/field_raporlar_ekler/280311",
+    "local_path": "data/raw/2024-03/4.Gelir-Gider.xls",
+    "sha256": "23947c77932fa6102315b55fae6028fd73ccb94ade993d94b76080840e0bcc1a",
+    "size_bytes": 138752,
+    "status": "existing"
+  },
+  {
+    "period": "2024-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51367/field_raporlar_ekler/280310",
+    "local_path": "data/raw/2024-03/5.Nazim.xls",
+    "sha256": "e17e9d82a0458c4de9891fa8d7257797d91f9871a0d468e10bf6e59ea46e728b",
+    "size_bytes": 61952,
+    "status": "existing"
+  },
+  {
+    "period": "2024-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51367/field_raporlar_ekler/280309",
+    "local_path": "data/raw/2024-03/Aciklamalar.xls",
+    "sha256": "6311e9e386f7f89c079f44ac509bb68f3cd4d5d7c6eb8381822851e09033db55",
+    "size_bytes": 87552,
+    "status": "existing"
+  },
+  {
+    "period": "2024-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51392/field_raporlar_ekler/280654",
+    "local_path": "data/raw/2024-06/1.Mali_bunye.xls",
+    "sha256": "41db225c7af8509068f19fe75fb405ee38bb302b8c737898adc5f4ed7a568f27",
+    "size_bytes": 184832,
+    "status": "existing"
+  },
+  {
+    "period": "2024-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51392/field_raporlar_ekler/280655",
+    "local_path": "data/raw/2024-06/2.Aktifler.xls",
+    "sha256": "adba7d1ac5565837b5ea20397fbeb0632b5b31f01c75ead3f59d78912845a221",
+    "size_bytes": 265728,
+    "status": "existing"
+  },
+  {
+    "period": "2024-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51392/field_raporlar_ekler/280653",
+    "local_path": "data/raw/2024-06/3.Pasifler.xls",
+    "sha256": "f0c4e32336d3091bd714cd33539ef7c56d764c5cbbe1a3f145f9e269ee088470",
+    "size_bytes": 152064,
+    "status": "existing"
+  },
+  {
+    "period": "2024-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51392/field_raporlar_ekler/280652",
+    "local_path": "data/raw/2024-06/4.Gelir-Gider.xls",
+    "sha256": "31cb4d1d108cb4c5fefccd23547d46ffb4e2305adf91be4fedfcf4be7e479a0e",
+    "size_bytes": 138752,
+    "status": "existing"
+  },
+  {
+    "period": "2024-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51392/field_raporlar_ekler/280651",
+    "local_path": "data/raw/2024-06/5.Nazim.xls",
+    "sha256": "c7d50e471e9b128d3dd7e0eb07964948578a3345aad46dc20c740e0db10b32ad",
+    "size_bytes": 61952,
+    "status": "existing"
+  },
+  {
+    "period": "2024-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51392/field_raporlar_ekler/280650",
+    "local_path": "data/raw/2024-06/Aciklamalar.xls",
+    "sha256": "1a65af4f141b0d1c0c32867c9ecbd47ffea32c3a04482d240f9ce4b18a67a3f2",
+    "size_bytes": 87552,
+    "status": "existing"
+  },
+  {
+    "period": "2024-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51415/field_raporlar_ekler/280985",
+    "local_path": "data/raw/2024-09/1.Mali_bunye.xls",
+    "sha256": "e84bedc55f1c2960b71ab0fa51162ae922e9d4bba53c9f423483e39ed2723a1a",
+    "size_bytes": 184832,
+    "status": "existing"
+  },
+  {
+    "period": "2024-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51415/field_raporlar_ekler/280984",
+    "local_path": "data/raw/2024-09/2.Aktifler.xls",
+    "sha256": "08b1e4c9b27c5ead8388e80a11c8bb586d15a316a0e1f969763f0b1437f954db",
+    "size_bytes": 266752,
+    "status": "existing"
+  },
+  {
+    "period": "2024-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51415/field_raporlar_ekler/280983",
+    "local_path": "data/raw/2024-09/3.Pasifler.xls",
+    "sha256": "7f450d8b04052f97e4899387d67d48ce1a3055ecf426ad94e77ffad9cc01761b",
+    "size_bytes": 152064,
+    "status": "existing"
+  },
+  {
+    "period": "2024-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51415/field_raporlar_ekler/280982",
+    "local_path": "data/raw/2024-09/4.Gelir-Gider.xls",
+    "sha256": "f82eac70d68b1695a819d457738f75e05d1220bc87fc3b57036a63ee512389b4",
+    "size_bytes": 139264,
+    "status": "existing"
+  },
+  {
+    "period": "2024-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51415/field_raporlar_ekler/280981",
+    "local_path": "data/raw/2024-09/5.Nazim.xls",
+    "sha256": "333ec15a7ba4f12be7778be868fd812920336a7e75ba9559b02df23bf2cc7ae2",
+    "size_bytes": 61952,
+    "status": "existing"
+  },
+  {
+    "period": "2024-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/51415/field_raporlar_ekler/280980",
+    "local_path": "data/raw/2024-09/Aciklamalar.xls",
+    "sha256": "63f3ddf94dfaf4502f282b94bd599f4c02d8715d922113e12b3f82897b26a1e5",
+    "size_bytes": 87552,
+    "status": "existing"
+  },
+  {
+    "period": "2024-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54435/field_raporlar_ekler/304492",
+    "local_path": "data/raw/2024-12/1.mali-bunye.xls",
+    "sha256": "0b68c214f29ad39cce8c07b448849ad1b749d5e38de8bd233a3b86b4e850d5c6",
+    "size_bytes": 379904,
+    "status": "existing"
+  },
+  {
+    "period": "2024-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54435/field_raporlar_ekler/304493",
+    "local_path": "data/raw/2024-12/2.aktifler.xls",
+    "sha256": "c800bab31757890120fb95543f2c8c202556f5ddd4b57f29af6bc2e82b0e28e9",
+    "size_bytes": 268288,
+    "status": "existing"
+  },
+  {
+    "period": "2024-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54435/field_raporlar_ekler/304494",
+    "local_path": "data/raw/2024-12/3.pasifler.xls",
+    "sha256": "3ca4c5e34847e8340e746972ddddbf82eb0e3753ff404b1259b8ae812c5c58a2",
+    "size_bytes": 153088,
+    "status": "existing"
+  },
+  {
+    "period": "2024-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54435/field_raporlar_ekler/304495",
+    "local_path": "data/raw/2024-12/4.gelir-gider.xls",
+    "sha256": "db67aa70177e1561cfebcb471d90411389aecb303e434bcc7816eb3c88047ee2",
+    "size_bytes": 139776,
+    "status": "existing"
+  },
+  {
+    "period": "2024-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54435/field_raporlar_ekler/304496",
+    "local_path": "data/raw/2024-12/5.nazim_.xls",
+    "sha256": "81a6a5080dbc0e7fcf67e50a580c25c256432e46cb94a835176760f55e3412a9",
+    "size_bytes": 132608,
+    "status": "existing"
+  },
+  {
+    "period": "2024-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2024-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54435/field_raporlar_ekler/304497",
+    "local_path": "data/raw/2024-12/aciklamalar.xls",
+    "sha256": "267a1b4afe68ee00ca1926bc2a6f0ec02a298ed8b9a55cc64a0f6f5d2b532f2f",
+    "size_bytes": 87552,
+    "status": "existing"
+  },
+  {
+    "period": "2025-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54465/field_raporlar_ekler/304966",
+    "local_path": "data/raw/2025-03/1.mali-bunye.xls",
+    "sha256": "9ed2e1387ebca9b78c5d06d8cca686beb561a4f351672395a5342ac2528a2260",
+    "size_bytes": 185856,
+    "status": "existing"
+  },
+  {
+    "period": "2025-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54465/field_raporlar_ekler/304967",
+    "local_path": "data/raw/2025-03/2.aktifler.xls",
+    "sha256": "ac7dc6b9c1a642d91b5f23a0b71e9afe17419488a6b6c3a2b379d517c2a48003",
+    "size_bytes": 267776,
+    "status": "existing"
+  },
+  {
+    "period": "2025-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54465/field_raporlar_ekler/304968",
+    "local_path": "data/raw/2025-03/3.pasifler.xls",
+    "sha256": "70bdf2e4fae59a47a4e943a08db2ac9720c8d9b087885835d6879491a17f5ffd",
+    "size_bytes": 154624,
+    "status": "existing"
+  },
+  {
+    "period": "2025-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54465/field_raporlar_ekler/304969",
+    "local_path": "data/raw/2025-03/4.gelir-gider.xls",
+    "sha256": "e86cec19624fcc5cc1e356575bbf7c18e15351a823453ffc4a0d87dcc599b2e4",
+    "size_bytes": 139776,
+    "status": "existing"
+  },
+  {
+    "period": "2025-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54465/field_raporlar_ekler/304970",
+    "local_path": "data/raw/2025-03/5.nazim_.xls",
+    "sha256": "11dca0b95b6b0911d13ef63d095d4c02d9124d02fd986c07d95d9cfbd7fbad60",
+    "size_bytes": 62464,
+    "status": "existing"
+  },
+  {
+    "period": "2025-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54465/field_raporlar_ekler/304971",
+    "local_path": "data/raw/2025-03/aciklamalar.xls",
+    "sha256": "a15b35b063dfcbbc310aa948622326155f00ab8cc092aded59e062fd2a1c89e3",
+    "size_bytes": 87552,
+    "status": "existing"
+  },
+  {
+    "period": "2025-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54559/field_raporlar_ekler/306016",
+    "local_path": "data/raw/2025-06/1.mali-bunye.xls",
+    "sha256": "9e82db1df2187c1398445d38e4ef0d068283f4833a02355f10963204ce68a4f6",
+    "size_bytes": 190464,
+    "status": "existing"
+  },
+  {
+    "period": "2025-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54559/field_raporlar_ekler/306017",
+    "local_path": "data/raw/2025-06/2.aktifler.xls",
+    "sha256": "15a3ae19356204873437d42bc9561c55945bc16080093962f55f3c9f0e1ea0d2",
+    "size_bytes": 275968,
+    "status": "existing"
+  },
+  {
+    "period": "2025-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54559/field_raporlar_ekler/306018",
+    "local_path": "data/raw/2025-06/3.pasifler.xls",
+    "sha256": "9e72ce9fe1f60774c9527f8d4766828218ce76ecd285d8eba04085963ba253b4",
+    "size_bytes": 157696,
+    "status": "existing"
+  },
+  {
+    "period": "2025-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54559/field_raporlar_ekler/306019",
+    "local_path": "data/raw/2025-06/4.gelir-gider.xls",
+    "sha256": "81f1ce90e18da82ad6f49bb6165201fe3cc3e49f1e365d71acdbea8dc2e7b65a",
+    "size_bytes": 143360,
+    "status": "existing"
+  },
+  {
+    "period": "2025-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54559/field_raporlar_ekler/306020",
+    "local_path": "data/raw/2025-06/5.nazim_.xls",
+    "sha256": "0d7683748dd3e3507452dec7a8597d66b4aa4fd4a3497ad5eada53844523a833",
+    "size_bytes": 63488,
+    "status": "existing"
+  },
+  {
+    "period": "2025-06",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-haziran-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54559/field_raporlar_ekler/306021",
+    "local_path": "data/raw/2025-06/aciklamalar.xls",
+    "sha256": "c0a7adc28e8fcc75864f9dfb39dd96ae13d06c997072d0506fb3e4a9c1191d2b",
+    "size_bytes": 87552,
+    "status": "existing"
+  },
+  {
+    "period": "2025-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54640/field_raporlar_ekler/307178",
+    "local_path": "data/raw/2025-09/1.mali-bunye.xls",
+    "sha256": "0569c04f2865a7bfbb761058e3589bccf9690886923604a7b4f965d314ea7cc7",
+    "size_bytes": 192000,
+    "status": "existing"
+  },
+  {
+    "period": "2025-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54640/field_raporlar_ekler/307179",
+    "local_path": "data/raw/2025-09/2.aktifler.xls",
+    "sha256": "e6ce3945d44876fed38b6a3079bd8a8ffb47e26fdd7d40b6a86f00b64d183ba0",
+    "size_bytes": 277504,
+    "status": "existing"
+  },
+  {
+    "period": "2025-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54640/field_raporlar_ekler/307180",
+    "local_path": "data/raw/2025-09/3.pasifler.xls",
+    "sha256": "d9c90f2d4bb1ead659823ea801260ff0fbacc2d24775022a62e81accf5137036",
+    "size_bytes": 159232,
+    "status": "existing"
+  },
+  {
+    "period": "2025-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54640/field_raporlar_ekler/307181",
+    "local_path": "data/raw/2025-09/4.gelir-gider.xls",
+    "sha256": "a60762d0c9a9518aba36b85e504f6704586334d7f54079cbfaa7ff381d2936d2",
+    "size_bytes": 144896,
+    "status": "existing"
+  },
+  {
+    "period": "2025-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54640/field_raporlar_ekler/307182",
+    "local_path": "data/raw/2025-09/5.nazim_.xls",
+    "sha256": "3ddbc8c499cc7988eec058f7ffa031ade5fea255535d653b8429592af75ae5f6",
+    "size_bytes": 63488,
+    "status": "existing"
+  },
+  {
+    "period": "2025-09",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-eylul-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54640/field_raporlar_ekler/307183",
+    "local_path": "data/raw/2025-09/aciklamalar.xls",
+    "sha256": "1b33d4d7acd45aed412d7f91ed0dc28172ab66ab060ca08a84fa1310262c5373",
+    "size_bytes": 87552,
+    "status": "existing"
+  },
+  {
+    "period": "2025-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54824/field_raporlar_ekler/308497",
+    "local_path": "data/raw/2025-12/1.Mali bünye.xls",
+    "sha256": "32e1189d02b1473a936ff900d4e652fac72b953ee306cc9c5ad551c1e0cc6eda",
+    "size_bytes": 393728,
+    "status": "existing"
+  },
+  {
+    "period": "2025-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54824/field_raporlar_ekler/308498",
+    "local_path": "data/raw/2025-12/2.Aktifler.xls",
+    "sha256": "310696cc200913b448daf9deed593559ff55f3d571b0241ea7d864cc1c4601d0",
+    "size_bytes": 279552,
+    "status": "existing"
+  },
+  {
+    "period": "2025-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54824/field_raporlar_ekler/308499",
+    "local_path": "data/raw/2025-12/3.Pasifler.xls",
+    "sha256": "4cc5ec3b0d84e43daa075dbdbf2ce4608c56a287752cb149208ba29988bfb63d",
+    "size_bytes": 173568,
+    "status": "existing"
+  },
+  {
+    "period": "2025-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54824/field_raporlar_ekler/308500",
+    "local_path": "data/raw/2025-12/4.Gelir-Gider.xls",
+    "sha256": "4711ee718ef7c96c4cb578cbb32470859b62751caceb79cfe924374e070559ef",
+    "size_bytes": 144896,
+    "status": "existing"
+  },
+  {
+    "period": "2025-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54824/field_raporlar_ekler/308501",
+    "local_path": "data/raw/2025-12/5.Nazım.xls",
+    "sha256": "44383d6ddda6518eea52896a3e1e10671ad180bb9e1f586e070dc1ac9097dcc4",
+    "size_bytes": 136704,
+    "status": "existing"
+  },
+  {
+    "period": "2025-12",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2025-aralik-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54824/field_raporlar_ekler/308502",
+    "local_path": "data/raw/2025-12/Açıklamalar.xls",
+    "sha256": "06a9e89ad0dbf9172dcef34151052a89d4dbaf974a5e08bc0dc3cd35f4e24855",
+    "size_bytes": 87552,
+    "status": "existing"
+  },
+  {
+    "period": "2026-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2026-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54855/field_raporlar_ekler/308992",
+    "local_path": "data/raw/2026-03/1.Mali bünye.xls",
+    "sha256": "f8f5dcbeba8843ad8e7012ca99ffe20cf75a23e3e57b4265ad30737656dd4183",
+    "size_bytes": 191488,
+    "status": "existing"
+  },
+  {
+    "period": "2026-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2026-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54855/field_raporlar_ekler/308993",
+    "local_path": "data/raw/2026-03/2.Aktifler.xls",
+    "sha256": "137dbc4e7106d7938fad863848858f8a74aa9755bebe866f65f472719f1cd565",
+    "size_bytes": 276480,
+    "status": "existing"
+  },
+  {
+    "period": "2026-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2026-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54855/field_raporlar_ekler/308994",
+    "local_path": "data/raw/2026-03/3.Pasifler.xls",
+    "sha256": "14f21fa78478ee2389ecc34f91b620a4c60191ce3bc24093c20003ca3ecd8839",
+    "size_bytes": 158208,
+    "status": "existing"
+  },
+  {
+    "period": "2026-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2026-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54855/field_raporlar_ekler/308995",
+    "local_path": "data/raw/2026-03/4.Gelir-Gider.xls",
+    "sha256": "b09f5e428a4e74f30ae8e16b595360e6ec704d75896cb096eca27af6034c04fc",
+    "size_bytes": 143360,
+    "status": "existing"
+  },
+  {
+    "period": "2026-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2026-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54855/field_raporlar_ekler/308996",
+    "local_path": "data/raw/2026-03/5.Nazım.xls",
+    "sha256": "d479bf4be829db7785821189b5df8bb613dd8068a31187cb2895e1662aa3975b",
+    "size_bytes": 63488,
+    "status": "existing"
+  },
+  {
+    "period": "2026-03",
+    "report_url": "https://www.tbb.org.tr/istatistiki-raporlar/2026-mart-banka-bilgileri-secilmis-tablolar-konsolide-olmayansolo-banka",
+    "source_url": "https://www.tbb.org.tr/download/node/54855/field_raporlar_ekler/308997",
+    "local_path": "data/raw/2026-03/Açıklamalar.xls",
+    "sha256": "06a9e89ad0dbf9172dcef34151052a89d4dbaf974a5e08bc0dc3cd35f4e24855",
+    "size_bytes": 87552,
+    "status": "existing"
+  }
+]

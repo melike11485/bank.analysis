@@ -1,5 +1,7 @@
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest import TestCase
+from unittest.mock import patch
 
 from src.tbb_dashboard.download import DEFAULT_START, parse_period, quarter_range
 from src.tbb_dashboard.labels import metric_display_label
@@ -8,6 +10,7 @@ from src.tbb_dashboard.ingest import (
     canonical_text,
     classify_entity,
     deduplicate_observations,
+    ensure_database,
     first_data_row,
     metric_headers,
     period_from_folder,
@@ -134,3 +137,23 @@ class CoreTests(TestCase):
             deduplicate_observations(
                 [self.observation(10.0), self.observation(11.0)], "test"
             )
+
+    def test_missing_database_is_built_once_and_published_atomically(self) -> None:
+        with TemporaryDirectory() as temporary_dir:
+            root = Path(temporary_dir)
+            raw_dir = root / "raw"
+            database = root / "processed" / "tbb.db"
+            raw_dir.mkdir()
+
+            def fake_ingest(source: Path, target: Path) -> None:
+                self.assertEqual(source, raw_dir)
+                self.assertNotEqual(target, database)
+                target.write_bytes(b"complete database")
+
+            with patch(
+                "src.tbb_dashboard.ingest.ingest", side_effect=fake_ingest
+            ) as mocked_ingest:
+                self.assertTrue(ensure_database(raw_dir, database))
+                self.assertEqual(database.read_bytes(), b"complete database")
+                self.assertFalse(ensure_database(raw_dir, database))
+                mocked_ingest.assert_called_once()
