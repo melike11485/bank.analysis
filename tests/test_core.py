@@ -2,10 +2,41 @@ from pathlib import Path
 from unittest import TestCase
 
 from src.tbb_dashboard.download import DEFAULT_START, parse_period, quarter_range
-from src.tbb_dashboard.ingest import canonical_text, classify_entity, period_from_folder
+from src.tbb_dashboard.labels import metric_display_label
+from src.tbb_dashboard.ingest import (
+    availability_status,
+    canonical_text,
+    classify_entity,
+    deduplicate_observations,
+    first_data_row,
+    metric_headers,
+    period_from_folder,
+)
+
+
+class FakeSheet:
+    def __init__(self, rows: list[list[object]], merged_cells: list[tuple]) -> None:
+        self.name = "Varlıklar"
+        self.nrows = len(rows)
+        self.ncols = max(len(row) for row in rows)
+        self.rows = [row + [""] * (self.ncols - len(row)) for row in rows]
+        self.merged_cells = merged_cells
+
+    def cell_value(self, row: int, col: int) -> object:
+        return self.rows[row][col]
 
 
 class CoreTests(TestCase):
+    @staticmethod
+    def observation(value: float) -> tuple:
+        row = [None] * 18
+        row[0] = "same-id"
+        row[8] = "Örnek Banka A.Ş."
+        row[10] = "ornek_banka_a_s"
+        row[12] = "Örnek Metrik"
+        row[14] = value
+        return tuple(row)
+
     def test_turkish_names_have_stable_keys(self) -> None:
         self.assertEqual(canonical_text("Mali Bünye"), "mali_bunye")
         self.assertEqual(canonical_text("İstikrarlı Fonlama Oranı"), "istikrarli_fonlama_orani")
@@ -29,3 +60,77 @@ class CoreTests(TestCase):
 
     def test_default_download_starts_in_march_2020(self) -> None:
         self.assertEqual(DEFAULT_START, (2020, 3))
+
+    def test_currency_abbreviations_are_expanded_outside_mali_bunye(self) -> None:
+        self.assertEqual(
+            metric_display_label("aktifler.test.metric", "Krediler - TP / YP"),
+            "Krediler - Türk Parası / Yabancı Para",
+        )
+        self.assertEqual(
+            metric_display_label("mali_bunye.test.metric", "Krediler - TP / YP"),
+            "Krediler - TP / YP",
+        )
+
+    def test_summary_fallback_is_not_reported_as_missing(self) -> None:
+        period = "2024-12-31"
+        group = "pasifler"
+        sheet = "ser_benz"
+        self.assertEqual(
+            availability_status(
+                period,
+                group,
+                sheet,
+                present=set(),
+                published_months={(group, sheet): {"12"}},
+                first_published={(group, sheet): "2020-12-31"},
+                summary_available={(period, group, sheet)},
+            ),
+            "summary_available",
+        )
+
+    def test_header_hierarchy_follows_excel_boundaries_when_rows_shift(self) -> None:
+        sheet = FakeSheet(
+            [
+                [""],
+                ["Varlıklar, Milyon TL"],
+                ["(Mart 2020)"],
+                [""],
+                ["", "Finansal Varlıklar (net)", "", "", "", "İtfa Edilmiş Maliyeti ile Ölçülen FV (Net)"],
+                ["", "Likit Aktifler", "", "", "", "Krediler"],
+                ["Banka", "Nakit Değerler ve TCMB", "Bankalar", "Para Piyasalarından Alacaklar", "Toplam", "Krediler"],
+                [""],
+                ["Sektör Toplamı", 10.0, 20.0, 30.0, 60.0, 40.0],
+            ],
+            [
+                (4, 5, 1, 5),
+                (5, 6, 1, 5),
+                (4, 5, 5, 6),
+                (5, 7, 5, 6),
+            ],
+        )
+
+        self.assertEqual(first_data_row(sheet), 8)
+        self.assertEqual(
+            metric_headers(sheet),
+            [
+                "entity",
+                "Finansal Varlıklar (net) > Likit Aktifler > Nakit Değerler ve TCMB",
+                "Finansal Varlıklar (net) > Likit Aktifler > Bankalar",
+                "Finansal Varlıklar (net) > Likit Aktifler > Para Piyasalarından Alacaklar",
+                "Finansal Varlıklar (net) > Likit Aktifler > Toplam",
+                "İtfa Edilmiş Maliyeti ile Ölçülen FV (Net) > Krediler",
+            ],
+        )
+
+    def test_identical_source_rows_are_counted_once(self) -> None:
+        observation = self.observation(10.0)
+        self.assertEqual(
+            deduplicate_observations([observation, observation], "test"),
+            [observation],
+        )
+
+    def test_conflicting_duplicate_rows_are_rejected(self) -> None:
+        with self.assertRaises(ValueError):
+            deduplicate_observations(
+                [self.observation(10.0), self.observation(11.0)], "test"
+            )
