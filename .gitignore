@@ -180,7 +180,8 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 # bank.analysis generated data
-data/raw/
+# Kaynak XLS dosyalari Streamlit Cloud'un veritabanini ilk acilista
+# olusturabilmesi icin depoda tutulur.
 data/processed/
 outputs/
 .DS_Store

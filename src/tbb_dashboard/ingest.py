@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import re
 import sqlite3
+import tempfile
 import unicodedata
 from datetime import date
 from pathlib import Path
@@ -497,6 +498,36 @@ def ingest(raw_dir: Path, database: Path) -> None:
         f"{not_yet_published} henüz yürürlükte olmayan, "
         f"{summary_available} özet metriği bulunan sayfa kaydı -> {database}"
     )
+
+
+def ensure_database(raw_dir: Path, database: Path) -> bool:
+    """Eksik veritabanini kaynak XLS dosyalarindan atomik olarak olusturur.
+
+    Streamlit Community Cloud her dagitimda temiz bir dosya sistemiyle baslar.
+    Kaynak dosyalar depoda bulunurken buyuk SQLite dosyasi depoya eklenmez;
+    bunun yerine ilk uygulama acilisinda yeniden uretilir. Basarili olana kadar
+    hedef dosyaya dokunulmadigi icin yarim kalmis bir veritabani kullanilmaz.
+    """
+    if database.exists():
+        return False
+    if not raw_dir.is_dir():
+        raise FileNotFoundError(f"Kaynak veri klasörü bulunamadı: {raw_dir}")
+
+    database.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        dir=database.parent,
+        prefix=f".{database.stem}-",
+        suffix=database.suffix,
+        delete=False,
+    ) as handle:
+        temporary_database = Path(handle.name)
+
+    try:
+        ingest(raw_dir, temporary_database)
+        temporary_database.replace(database)
+    finally:
+        temporary_database.unlink(missing_ok=True)
+    return True
 
 
 def parse_args() -> argparse.Namespace:

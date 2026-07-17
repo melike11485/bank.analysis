@@ -10,9 +10,11 @@ import plotly.express as px
 import streamlit as st
 
 from src.tbb_dashboard.labels import SHEET_LABELS, metric_display_label
+from src.tbb_dashboard.ingest import ensure_database
 
 
 ROOT = Path(__file__).resolve().parents[2]
+RAW_DIR = ROOT / "data" / "raw"
 DB_PATH = ROOT / "data" / "processed" / "tbb.db"
 
 SOURCE_LABELS = {
@@ -759,9 +761,15 @@ st.markdown(
 )
 
 if not DB_PATH.exists():
-    st.error("Veritabanı bulunamadı. Önce veri indirme ve yükleme adımlarını çalıştırın.")
-    st.code("python3 -m src.tbb_dashboard.download\npython3 -m src.tbb_dashboard.ingest")
-    st.stop()
+    with st.spinner(
+        "TBB veritabanı ilk kullanım için hazırlanıyor. Bu işlem yaklaşık 20 saniye sürer..."
+    ):
+        try:
+            ensure_database(RAW_DIR, DB_PATH)
+        except Exception as exc:
+            st.error("Veritabanı kaynak TBB dosyalarından oluşturulamadı.")
+            st.exception(exc)
+            st.stop()
 
 catalog = load_catalog()
 calculator_catalog = catalog.drop_duplicates("metric_key").copy()

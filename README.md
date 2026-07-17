@@ -52,6 +52,18 @@ Analiz ekranını başlat:
 
     python3 -m streamlit run src/tbb_dashboard/dashboard.py
 
+Uygulama yerelde veya Streamlit Community Cloud'da ilk kez açıldığında
+`data/processed/tbb.db` bulunmuyorsa, depodaki `data/raw` TBB XLS dosyalarından
+veritabanını otomatik oluşturur. Üretilen SQLite dosyası büyük olduğu için GitHub'a
+eklenmez.
+
+Streamlit Community Cloud dağıtım ayarları:
+
+- Repository: `melike11485/bank.analysis`
+- Branch: `main`
+- Main file path: `src/tbb_dashboard/dashboard.py`
+- Python version: `3.12`
+
 Tarayıcıda açılan ekran ilk olarak dönemsel analizi gösterir. Dönemsel analiz,
 zaman analizi ve özelleştirilebilir metrikler birbirinden bağımsız ana
 sekmelerdir. Dönemsel analizde seçili bankaların tek dönem grafiği ve ilk 10
