@@ -40,6 +40,43 @@ SOURCE_AVAILABILITY_NOTES = {
     ),
 }
 
+EQUITY_METRIC = "mali_bunye.sermaye_std_orani.ozkaynak_milyon_tl"
+CAPITAL_ADEQUACY_METRIC = (
+    "mali_bunye.sermaye_std_orani.sermaye_yeterliligi_orani"
+)
+GENERAL_SIZE_METRIC = "aktifler.varliklar.toplam_aktifler"
+SYSTEMIC_BANK_GROUPS = (
+    ("Türkiye Cumhuriyeti Ziraat Bankası A.Ş.",),
+    ("Türkiye Halk Bankası A.Ş.",),
+    ("Türkiye Vakıflar Bankası T.A.O.",),
+    ("Akbank T.A.Ş.",),
+    ("Türkiye Garanti Bankası A.Ş.",),
+    ("Türkiye İş Bankası A.Ş.",),
+    ("Yapı ve Kredi Bankası A.Ş.",),
+    ("QNB Bank A.Ş.", "QNB Finansbank A.Ş."),
+    ("Denizbank A.Ş.",),
+)
+READY_BANK_FILTERS = (
+    "İlk 10 (seçili metrik)",
+    "İlk 15 (seçili metrik)",
+    "İlk 20 (seçili metrik)",
+    "İlk 25 (seçili metrik)",
+    "İlk 10 (genel banka büyüklüğü)",
+    "İlk 15 (genel banka büyüklüğü)",
+    "İlk 20 (genel banka büyüklüğü)",
+    "İlk 25 (genel banka büyüklüğü)",
+)
+
+
+def systemic_entities(all_entities: list[str]) -> list[str]:
+    """Return one available name for each systemic bank, in a stable order."""
+    available = set(all_entities)
+    return [
+        match
+        for aliases in SYSTEMIC_BANK_GROUPS
+        if (match := next((name for name in aliases if name in available), None))
+    ]
+
 
 def query(sql: str, params: tuple = ()) -> pd.DataFrame:
     with sqlite3.connect(DB_PATH) as connection:
@@ -161,6 +198,11 @@ def reset_filter_dependents(namespace: str) -> None:
 
 def reset_metric(namespace: str) -> None:
     st.session_state[f"{namespace}_metric"] = None
+    st.session_state.pop(f"{namespace}_chart_type", None)
+
+
+def reset_chart(namespace: str) -> None:
+    st.session_state.pop(f"{namespace}_chart_type", None)
 
 
 def sync_entity_filter(
@@ -176,7 +218,13 @@ def sync_entity_filter(
     st.session_state[selection_key] = list(selected)
 
 
-def render_metric_filters(namespace: str, catalog: pd.DataFrame) -> dict | None:
+def render_metric_filters(
+    namespace: str,
+    catalog: pd.DataFrame,
+    default_source: str = "mali_bunye",
+    default_sheet_key: str = "sermaye_std_orani",
+    default_metric_key: str = EQUITY_METRIC,
+) -> dict | None:
     with st.container(border=True):
         st.markdown("#### Analiz filtreleri")
         source_col, sheet_col, metric_col, level_col = st.columns([1, 1, 2, 1])
@@ -184,7 +232,7 @@ def render_metric_filters(namespace: str, catalog: pd.DataFrame) -> dict | None:
         source = source_col.selectbox(
             "Rapor grubu",
             sources,
-            index=sources.index("aktifler"),
+            index=sources.index(default_source),
             format_func=lambda item: SOURCE_LABELS[item],
             key=f"{namespace}_source",
             on_change=reset_filter_dependents,
@@ -192,7 +240,11 @@ def render_metric_filters(namespace: str, catalog: pd.DataFrame) -> dict | None:
         )
         source_catalog = catalog[catalog["source_group"] == source]
         sheet_options = source_catalog["sheet_key"].drop_duplicates().tolist()
-        default_sheet = "varliklar" if "varliklar" in sheet_options else sheet_options[0]
+        default_sheet = (
+            default_sheet_key
+            if default_sheet_key in sheet_options
+            else ("varliklar" if "varliklar" in sheet_options else sheet_options[0])
+        )
         sheet_lookup = (
             source_catalog.drop_duplicates("sheet_key")
             .set_index("sheet_key")["sheet_name"]
@@ -240,7 +292,11 @@ def render_metric_filters(namespace: str, catalog: pd.DataFrame) -> dict | None:
         else:
             metric_catalog = source_catalog[source_catalog["sheet_key"] == sheet]
             metric_options = metric_catalog["metric_key"].drop_duplicates().tolist()
-            preferred = f"{source}.{sheet}.toplam_aktifler"
+            preferred = (
+                default_metric_key
+                if default_metric_key in metric_options
+                else f"{source}.{sheet}.toplam_aktifler"
+            )
             default_metric = (
                 preferred if preferred in metric_options else metric_options[0]
             )
@@ -271,6 +327,8 @@ def render_metric_filters(namespace: str, catalog: pd.DataFrame) -> dict | None:
                 format_func=lambda item: metric_lookup[item],
                 key=metric_state_key,
                 placeholder="Veri seçiniz",
+                on_change=reset_chart,
+                args=(namespace,),
             )
         entity_type = level_col.radio(
             "Karşılaştırma düzeyi",
@@ -312,10 +370,12 @@ def render_metric_filters(namespace: str, catalog: pd.DataFrame) -> dict | None:
     }
 
 
-def render_chart_selector(namespace: str) -> str:
+def render_chart_selector(namespace: str, default: str = "Çizgi") -> str:
+    options = ["Çizgi", "Sütun", "Daire"]
     return st.radio(
         "Grafik türü",
-        ["Çizgi", "Sütun", "Daire"],
+        options,
+        index=options.index(default),
         horizontal=True,
         key=f"{namespace}_chart_type",
     )
@@ -327,6 +387,7 @@ def render_entity_filter(
     period: pd.Timestamp,
     default_count: int = 5,
     exact_count: int | None = None,
+    default_selection: str = "all",
 ) -> list[str]:
     data = context["data"]
     all_entities = context["all_entities"]
@@ -343,7 +404,14 @@ def render_entity_filter(
     ascending_value_order.extend(
         name for name in all_entities if name not in set(ascending_value_order)
     )
-    default_entities = value_order[:default_count]
+    if default_selection == "all":
+        default_entities = all_entities
+    elif default_selection == "halkbank":
+        default_entities = [
+            name for name in all_entities if name == "Türkiye Halk Bankası A.Ş."
+        ]
+    else:
+        default_entities = value_order[:default_count]
     selection_key = f"{namespace}_entity_selection_{entity_type}"
     legacy_selection_key = (
         f"{namespace}_entity_selection_{entity_type}_{metric_key}"
@@ -379,6 +447,52 @@ def render_entity_filter(
             ],
             key=f"{namespace}_entity_sort_{entity_type}",
         )
+        size_data = load_series(GENERAL_SIZE_METRIC, entity_type)
+        if not size_data.empty:
+            size_data["period_end"] = pd.to_datetime(size_data["period_end"])
+            size_snapshot = size_data[size_data["period_end"] == period]
+            if size_snapshot.empty:
+                earlier = size_data[size_data["period_end"] <= period]
+                if not earlier.empty:
+                    size_snapshot = earlier[
+                        earlier["period_end"] == earlier["period_end"].max()
+                    ]
+            size_order = (
+                size_snapshot.sort_values("value", ascending=False)["entity_name"]
+                .drop_duplicates()
+                .tolist()
+            )
+        else:
+            size_order = []
+        size_order.extend(name for name in all_entities if name not in set(size_order))
+        preset = st.selectbox(
+            "Hazır banka filtresi",
+            READY_BANK_FILTERS,
+            index=None,
+            placeholder="Hazır filtre seçin",
+            key=f"{namespace}_entity_preset_{entity_type}",
+            help=(
+                "Seçili metrik filtreleri mevcut finansal metriğe; genel banka "
+                "büyüklüğü filtreleri Toplam Aktifler değerine göre sıralanır."
+            ),
+        )
+        apply_preset = st.button(
+            "Hazır filtreyi uygula",
+            key=f"{namespace}_entity_preset_apply_{entity_type}",
+            use_container_width=True,
+            disabled=preset is None,
+        )
+        if apply_preset and preset:
+            count = int(preset.split()[1])
+            ranking = size_order if "genel banka büyüklüğü" in preset else value_order
+            new_selection = ranking[:count]
+            st.session_state[selection_key] = list(new_selection)
+            selected_for_preset = set(new_selection)
+            for entity_name in all_entities:
+                st.session_state[checkbox_key(entity_name)] = (
+                    entity_name in selected_for_preset
+                )
+            st.rerun()
         action_a, action_b = st.columns(2)
         primary_label = f"İlk {exact_count}'yi seç" if exact_count else "Tümünü seç"
         primary_clicked = action_a.button(
@@ -791,11 +905,12 @@ calculator_catalog = calculator_catalog.sort_values("display_name")
 calculator_options = calculator_catalog["metric_key"].tolist()
 calculator_lookup = calculator_catalog.set_index("metric_key")["display_name"].to_dict()
 
-period_tab, time_tab, calculator_tab = st.tabs(
+period_tab, time_tab, calculator_tab, simulation_tab = st.tabs(
     [
         "Dönemsel analiz",
         "Zaman analizi",
         "Özelleştirilebilir metrikler",
+        "Metrik simülasyonu",
     ]
 )
 
@@ -814,9 +929,21 @@ with period_tab:
                 key="period_analysis_date",
             )
         with bank_filter_col:
-            entities = render_entity_filter(context, "period", analysis_date, default_count=5)
+            entities = render_entity_filter(
+                context,
+                "period",
+                analysis_date,
+                default_selection="all",
+            )
         with chart_col:
-            chart_type = render_chart_selector("period")
+            chart_type = render_chart_selector(
+                "period",
+                default=(
+                    "Çizgi"
+                    if context["metric_key"] == CAPITAL_ADEQUACY_METRIC
+                    else "Sütun"
+                ),
+            )
         data = context["data"]
         unit = context["unit"]
         snapshot = data[
@@ -826,9 +953,40 @@ with period_tab:
             "value", ascending=False
         ).copy()
         ranking_all["Sıra"] = range(1, len(ranking_all) + 1)
-        single_chart_tab, top_ten_tab, table_tab, quality_tab = st.tabs(
-            ["Tek dönem grafiği", "İlk 10 banka", "Veri tablosu", "Veri kalitesi"]
+        systemic_tab, single_chart_tab, table_tab, quality_tab = st.tabs(
+            ["Sistemik 9 banka", "Seçilebilir bankalar", "Veri tablosu", "Veri kalitesi"]
         )
+        with systemic_tab:
+            systemic_names = systemic_entities(
+                ranking_all["entity_name"].dropna().unique().tolist()
+            )
+            systemic_snapshot = ranking_all[
+                ranking_all["entity_name"].isin(systemic_names)
+            ].sort_values("value")
+            systemic_figure = px.bar(
+                systemic_snapshot,
+                x="value",
+                y="entity_name",
+                orientation="h",
+                labels={"entity_name": "", "value": unit},
+                color="value",
+                color_continuous_scale=["#DCECF9", "#082F57"],
+            )
+            systemic_figure.update_layout(
+                height=520,
+                coloraxis_showscale=False,
+                title=(
+                    f"{context['period_labels'][analysis_date]} • Sistemik öneme "
+                    "sahip 9 banka"
+                ),
+                plot_bgcolor="white",
+                paper_bgcolor="white",
+            )
+            st.plotly_chart(
+                systemic_figure,
+                width="stretch",
+                key="period_systemic_chart",
+            )
         with single_chart_tab:
             if snapshot.empty:
                 st.info("Grafik için en az bir banka veya kurum seçin.")
@@ -866,50 +1024,6 @@ with period_tab:
                     figure.update_layout(coloraxis_showscale=False)
                 figure.update_layout(height=500, plot_bgcolor="white", paper_bgcolor="white")
                 st.plotly_chart(figure, width="stretch", key="period_single_chart")
-        with top_ten_tab:
-            top_ten = ranking_all.head(10).sort_values("value")
-            if chart_type == "Daire":
-                top_ten = top_ten.copy()
-                top_ten["pie_value"] = top_ten["value"].abs()
-                top_figure = px.pie(
-                    top_ten,
-                    names="entity_name",
-                    values="pie_value",
-                    hole=0.38,
-                    color_discrete_sequence=COLORS,
-                )
-            elif chart_type == "Çizgi":
-                top_figure = px.line(
-                    top_ten.sort_values("value", ascending=False),
-                    x="entity_name",
-                    y="value",
-                    markers=True,
-                    labels={"entity_name": "", "value": unit},
-                    color_discrete_sequence=["#0F4C81"],
-                )
-                top_figure.update_xaxes(tickangle=-25)
-            else:
-                top_figure = px.bar(
-                    top_ten,
-                    x="value",
-                    y="entity_name",
-                    orientation="h",
-                    labels={"entity_name": "", "value": unit},
-                    color="value",
-                    color_continuous_scale=["#DCECF9", "#082F57"],
-                )
-            top_figure.update_layout(
-                height=520,
-                coloraxis_showscale=False,
-                title=f"{context['period_labels'][analysis_date]} • İlk 10 banka/kurum",
-                plot_bgcolor="white",
-                paper_bgcolor="white",
-            )
-            st.plotly_chart(
-                top_figure,
-                width="stretch",
-                key="period_top_ten_chart",
-            )
         period_table = ranking_all[["Sıra", "entity_name", "value", "unit"]].rename(
             columns={"entity_name": "Banka / kurum", "value": "Değer", "unit": "Birim"}
         )
@@ -940,26 +1054,50 @@ with time_tab:
         dates = context["period_dates"]
         c1, c2, c3, c4 = st.columns([1, 1, 2, 1])
         with c1:
+            december_2023 = next(
+                (
+                    item
+                    for item in dates[:-1]
+                    if item.year == 2023 and item.month == 12
+                ),
+                dates[0],
+            )
             start_date = st.selectbox(
                 "Başlangıç dönemi",
                 dates[:-1],
-                index=0,
+                index=dates[:-1].index(december_2023),
                 format_func=lambda item: context["period_labels"][item],
                 key="time_start",
             )
         end_options = [item for item in dates if item > start_date]
         with c2:
+            december_end_options = [item for item in end_options if item.month == 12]
+            default_end = (
+                december_end_options[-1] if december_end_options else end_options[-1]
+            )
             end_date = st.selectbox(
                 "Bitiş dönemi",
                 end_options,
-                index=len(end_options) - 1,
+                index=end_options.index(default_end),
                 format_func=lambda item: context["period_labels"][item],
                 key=f"time_end_{start_date.date()}",
             )
         with c3:
-            entities = render_entity_filter(context, "time", end_date)
+            entities = render_entity_filter(
+                context,
+                "time",
+                end_date,
+                default_selection="halkbank",
+            )
         with c4:
-            chart_type = render_chart_selector("time")
+            chart_type = render_chart_selector(
+                "time",
+                default=(
+                    "Çizgi"
+                    if context["metric_key"] == CAPITAL_ADEQUACY_METRIC
+                    else "Sütun"
+                ),
+            )
         data = context["data"]
         comparison_periods = [item for item in dates if start_date <= item <= end_date]
         comparison_data = data[
@@ -982,8 +1120,9 @@ with time_tab:
         endpoints = comparison_data[
             comparison_data["period_end"].isin([start_date, end_date])
         ].copy()
-        trend_tab, endpoint_tab, quarterly_tab, annual_tab, table_tab, quality_tab = st.tabs(
+        systemic_tab, trend_tab, endpoint_tab, quarterly_tab, annual_tab, table_tab, quality_tab = st.tabs(
             [
+                "Sistemik 9 banka",
                 "Dönem seyri",
                 "Başlangıç–bitiş",
                 "Çeyreklik değişim",
@@ -992,6 +1131,29 @@ with time_tab:
                 "Veri kalitesi",
             ]
         )
+        with systemic_tab:
+            systemic_names = systemic_entities(context["all_entities"])
+            systemic_data = data[
+                data["entity_name"].isin(systemic_names)
+                & data["period_end"].between(start_date, end_date)
+            ].copy()
+            systemic_figure = make_time_figure(
+                systemic_data,
+                "value",
+                context["unit"],
+                chart_type,
+                comparison_periods,
+                context["period_labels"],
+                end_date,
+            )
+            if systemic_figure is None:
+                st.info("Sistemik 9 banka için seçili kapsamda veri bulunamadı.")
+            else:
+                st.plotly_chart(
+                    systemic_figure,
+                    width="stretch",
+                    key="time_systemic_chart",
+                )
         with trend_tab:
             if comparison_data.empty:
                 st.info("Grafik için en az bir banka veya kurum seçin.")
@@ -1283,7 +1445,7 @@ with calculator_tab:
                 calculator_context,
                 "calculator",
                 calculator_end,
-                default_count=5,
+                default_selection="halkbank",
             )
         with c4:
             chart_type = render_chart_selector("calculator")
@@ -1443,3 +1605,190 @@ with calculator_tab:
                     "Seçilen bütün metriklerde banka/kurum-dönem eksiği yok."
                 )
                 st.caption("Eksik kayıt listesi boş: seçilen kapsam eksiksiz.")
+
+
+with simulation_tab:
+    st.subheader("Metrik simülasyonu")
+    st.caption(
+        "İki metriğin oranını seçin; metriklere yüzdesel şok uygulayarak "
+        "senaryo sonucunu anında karşılaştırın."
+    )
+    with st.container(border=True):
+        st.markdown("#### Simülasyon ayarları")
+        s1, s2, s3 = st.columns([2, 2, 1])
+        simulation_metric_a = s1.selectbox(
+            "Metrik A (pay)",
+            calculator_options,
+            index=(
+                calculator_options.index(EQUITY_METRIC)
+                if EQUITY_METRIC in calculator_options
+                else 0
+            ),
+            format_func=lambda item: calculator_lookup[item],
+            key="simulation_metric_a",
+        )
+        simulation_metric_b = s2.selectbox(
+            "Metrik B (payda)",
+            calculator_options,
+            index=(
+                calculator_options.index(GENERAL_SIZE_METRIC)
+                if GENERAL_SIZE_METRIC in calculator_options
+                else min(1, len(calculator_options) - 1)
+            ),
+            format_func=lambda item: calculator_lookup[item],
+            key="simulation_metric_b",
+        )
+        simulation_entity_type = s3.radio(
+            "Karşılaştırma düzeyi",
+            list(ENTITY_LABELS),
+            format_func=lambda item: ENTITY_LABELS[item],
+            horizontal=True,
+            key="simulation_entity_type",
+        )
+
+    simulation_a = load_series(simulation_metric_a, simulation_entity_type).copy()
+    simulation_b = load_series(simulation_metric_b, simulation_entity_type).copy()
+    for frame in (simulation_a, simulation_b):
+        frame["period_end"] = pd.to_datetime(frame["period_end"])
+    simulation_periods = sorted(
+        set(simulation_a["period_end"]).intersection(simulation_b["period_end"])
+    )
+    simulation_entities = sorted(
+        set(simulation_a["entity_name"]).intersection(simulation_b["entity_name"])
+    )
+    if not simulation_periods or not simulation_entities:
+        st.warning("Seçilen iki metrik için ortak banka/kurum ve dönem bulunamadı.")
+    else:
+        simulation_labels = (
+            pd.concat(
+                [
+                    simulation_a[["period_end", "period_label"]],
+                    simulation_b[["period_end", "period_label"]],
+                ]
+            )
+            .drop_duplicates("period_end")
+            .set_index("period_end")["period_label"]
+            .to_dict()
+        )
+        f1, f2, f3 = st.columns([1, 2, 2])
+        simulation_period = f1.selectbox(
+            "Simülasyon dönemi",
+            simulation_periods,
+            index=len(simulation_periods) - 1,
+            format_func=lambda item: simulation_labels[item],
+            key="simulation_period",
+        )
+        default_entity = (
+            "Türkiye Halk Bankası A.Ş."
+            if "Türkiye Halk Bankası A.Ş." in simulation_entities
+            else simulation_entities[0]
+        )
+        simulation_entity = f2.selectbox(
+            "Banka / kurum",
+            simulation_entities,
+            index=simulation_entities.index(default_entity),
+            key="simulation_entity",
+        )
+        operation = f3.radio(
+            "Hesaplama",
+            ["Oran (A / B)", "Yüzde oran ((A / B) × 100)"],
+            horizontal=True,
+            key="simulation_operation",
+        )
+
+        shock_a_col, shock_b_col = st.columns(2)
+        shock_a = shock_a_col.number_input(
+            "Metrik A değişimi (%)",
+            min_value=-100.0,
+            max_value=1000.0,
+            value=0.0,
+            step=1.0,
+            help="Örneğin yüzde 10 artış için 10, yüzde 5 düşüş için -5 yazın.",
+            key="simulation_shock_a",
+        )
+        shock_b = shock_b_col.number_input(
+            "Metrik B değişimi (%)",
+            min_value=-100.0,
+            max_value=1000.0,
+            value=0.0,
+            step=1.0,
+            help="Örneğin yüzde 10 artış için 10, yüzde 5 düşüş için -5 yazın.",
+            key="simulation_shock_b",
+        )
+
+        def selected_value(frame: pd.DataFrame) -> float | None:
+            values = frame[
+                (frame["period_end"] == simulation_period)
+                & (frame["entity_name"] == simulation_entity)
+            ]["value"]
+            return float(values.iloc[0]) if not values.empty else None
+
+        base_a = selected_value(simulation_a)
+        base_b = selected_value(simulation_b)
+        if base_a is None or base_b is None:
+            st.warning("Seçilen banka ve dönemde iki metrik birlikte bulunmuyor.")
+        elif base_b == 0:
+            st.error("Metrik B sıfır olduğu için oran hesaplanamıyor.")
+        else:
+            simulated_a = base_a * (1 + shock_a / 100)
+            simulated_b = base_b * (1 + shock_b / 100)
+            if simulated_b == 0:
+                st.error("Simülasyon sonrası Metrik B sıfır; oran hesaplanamıyor.")
+            else:
+                multiplier = 100 if operation.startswith("Yüzde") else 1
+                base_result = base_a / base_b * multiplier
+                simulated_result = simulated_a / simulated_b * multiplier
+                result_change = (
+                    (simulated_result / base_result - 1) * 100
+                    if base_result != 0
+                    else pd.NA
+                )
+                r1, r2, r3, r4 = st.columns(4)
+                r1.metric("Metrik A (simüle)", number_tr(simulated_a, 2))
+                r2.metric("Metrik B (simüle)", number_tr(simulated_b, 2))
+                r3.metric(
+                    "Mevcut oran",
+                    (
+                        f"%{number_tr(base_result, 2)}"
+                        if multiplier == 100
+                        else number_tr(base_result, 4)
+                    ),
+                )
+                r4.metric(
+                    "Simüle oran",
+                    (
+                        f"%{number_tr(simulated_result, 2)}"
+                        if multiplier == 100
+                        else number_tr(simulated_result, 4)
+                    ),
+                    delta=(
+                        None
+                        if pd.isna(result_change)
+                        else f"%{number_tr(result_change, 2)}"
+                    ),
+                )
+                scenario = pd.DataFrame(
+                    {
+                        "Senaryo": ["Mevcut", "Simülasyon"],
+                        "Sonuç": [base_result, simulated_result],
+                    }
+                )
+                simulation_figure = px.bar(
+                    scenario,
+                    x="Senaryo",
+                    y="Sonuç",
+                    color="Senaryo",
+                    color_discrete_sequence=["#87BFF0", "#0F4C81"],
+                    labels={"Sonuç": operation},
+                )
+                simulation_figure.update_layout(
+                    height=380,
+                    showlegend=False,
+                    plot_bgcolor="white",
+                    paper_bgcolor="white",
+                )
+                st.plotly_chart(
+                    simulation_figure,
+                    width="stretch",
+                    key="metric_simulation_chart",
+                )
