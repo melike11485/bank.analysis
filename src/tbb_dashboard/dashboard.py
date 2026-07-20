@@ -32,9 +32,10 @@ SOURCE_LABELS = {
 }
 ENTITY_LABELS = {"bank": "Bankalar", "group": "Banka Grupları"}
 COLORS = [
+    "#59636F",  # koyu kurumsal gri
+    "#7A7F88",  # orta kurumsal gri
+    "#9A9DA4",  # açık kurumsal gri
     "#365F91",  # kurumsal mavi
-    "#9AADC2",  # açık arduvaz mavisi
-    "#8F3F60",  # mat mürdüm
     "#B88FA0",  # açık gül kurusu
     "#625276",  # koyu kül moru
     "#9A8DA8",  # açık kül moru
@@ -46,9 +47,10 @@ COLORS = [
     "#9187A1",  # gri lavanta
 ]
 CONTINUOUS_COLORS = [
-    "#365F91",
-    "#7186A2",
-    "#9AADC2",
+    "#59636F",
+    "#7A7F88",
+    "#9A9DA4",
+    "#8393AA",
     "#9A8DA8",
     "#806B90",
     "#984B6A",
@@ -458,6 +460,7 @@ def render_chart_selector(
     namespace: str,
     default: str = "Sütun",
     state_token: str | None = None,
+    label: str = "Grafik türü",
 ) -> str:
     options = ["Çizgi", "Sütun", "Daire"]
     widget_key = f"{namespace}_chart_type"
@@ -465,7 +468,7 @@ def render_chart_selector(
         token = hashlib.sha1(state_token.encode("utf-8")).hexdigest()[:12]
         widget_key = f"{widget_key}_{token}"
     return st.radio(
-        "Grafik türü",
+        label,
         options,
         index=options.index(default),
         horizontal=True,
@@ -1372,8 +1375,8 @@ with time_tab:
                 "Sistemik 9 banka",
                 "Dönem seyri",
                 "Başlangıç–bitiş",
-                "Çeyreklik değişim",
-                "Yıllık değişim",
+                "Çeyreklik",
+                "Yıllık",
                 "Veri tablosu",
                 "Veri kalitesi",
             ]
@@ -1441,47 +1444,99 @@ with time_tab:
                     f"time_trend_chart_{chart_type}",
                     "tbb_zaman_donem_seyri",
                 )
-        for tab, column, label, empty_text in (
+        for (
+            tab,
+            period_name,
+            change_column,
+            change_label,
+            empty_text,
+            annual_only,
+        ) in (
             (
                 quarterly_tab,
+                "Çeyreklik",
                 "quarterly_change",
                 "Çeyreklik değişim (%)",
                 "Çeyreklik değişim hesaplanamadı.",
+                False,
             ),
             (
                 annual_tab,
+                "Yıllık",
                 "annual_change",
                 "Yıllık değişim (Aralık–Aralık, %)",
                 "Aralık–Aralık yıllık değişim için önceki yılın Aralık verisi gerekir.",
+                True,
             ),
         ):
             with tab:
-                chart_frame = analysis_data
-                chart_periods = comparison_periods
-                if column == "annual_change":
+                chart_frame = analysis_data.copy()
+                chart_periods = comparison_periods.copy()
+                if annual_only:
                     chart_frame = analysis_data[
                         analysis_data["period_end"].dt.month == 12
                     ].copy()
                     chart_periods = [
                         period for period in comparison_periods if period.month == 12
                     ]
-                figure = make_time_figure(
+
+                value_title_col, value_selector_col = st.columns([3, 2])
+                with value_title_col:
+                    st.subheader(f"{period_name} değer")
+                with value_selector_col:
+                    value_chart_type = render_chart_selector(
+                        f"time_{period_name.lower()}_value",
+                        default="Sütun",
+                        state_token=context["metric_key"],
+                        label="Değer grafiği",
+                    )
+                value_figure = make_time_figure(
                     chart_frame,
-                    column,
-                    label,
-                    chart_type,
+                    "value",
+                    context["unit"],
+                    value_chart_type,
                     chart_periods,
                     context["period_labels"],
                     end_date,
                 )
-                if figure is None:
+                if value_figure is None:
+                    st.info(f"{period_name} değer grafiği için veri bulunamadı.")
+                else:
+                    render_downloadable_chart(
+                        value_figure,
+                        standard_export_frame(chart_frame),
+                        f"time_{period_name.lower()}_value_chart_{value_chart_type}",
+                        f"tbb_zaman_{period_name.lower()}_deger",
+                    )
+
+                st.divider()
+                change_title_col, change_selector_col = st.columns([3, 2])
+                with change_title_col:
+                    st.subheader(f"{period_name} değişim")
+                with change_selector_col:
+                    change_chart_type = render_chart_selector(
+                        f"time_{period_name.lower()}_change",
+                        default="Çizgi",
+                        state_token=context["metric_key"],
+                        label="Değişim grafiği",
+                    )
+                change_figure = make_time_figure(
+                    chart_frame,
+                    change_column,
+                    change_label,
+                    change_chart_type,
+                    chart_periods,
+                    context["period_labels"],
+                    end_date,
+                )
+                if change_figure is None:
                     st.info(empty_text)
                 else:
                     render_downloadable_chart(
-                        figure,
-                        standard_export_frame(chart_frame, [column]),
-                        f"time_{column}_chart_{chart_type}",
-                        f"tbb_zaman_{column}",
+                        change_figure,
+                        standard_export_frame(chart_frame, [change_column]),
+                        f"time_{change_column}_chart_{change_chart_type}",
+                        f"tbb_zaman_{change_column}",
                     )
         comparison = endpoints.pivot_table(
             index="entity_name", columns="period_end", values="value", aggfunc="first"
