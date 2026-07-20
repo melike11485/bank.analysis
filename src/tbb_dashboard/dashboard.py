@@ -152,6 +152,55 @@ def number_tr(value: float, decimals: int = 0) -> str:
     return text.replace(",", "_").replace(".", ",").replace("_", ".")
 
 
+def display_table(frame: pd.DataFrame) -> pd.DataFrame:
+    """Format numeric cells for display while leaving source data untouched."""
+    formatted = frame.copy()
+    for column in formatted.select_dtypes(include="number").columns:
+        formatted[column] = formatted[column].map(
+            lambda value: "" if pd.isna(value) else number_tr(value)
+        )
+    return formatted
+
+
+def apply_chart_number_format(figure) -> None:
+    """Show rounded Turkish-formatted values directly on every chart."""
+    figure.update_layout(separators=",.")
+    for trace in figure.data:
+        if trace.type == "scatter":
+            trace.update(
+                texttemplate="%{y:,.0f}",
+                textposition="top center",
+                hovertemplate=(
+                    "%{fullData.name}<br>%{x}<br>%{y:,.0f}<extra></extra>"
+                ),
+            )
+        elif trace.type == "bar":
+            horizontal = getattr(trace, "orientation", None) == "h"
+            trace.update(
+                texttemplate="%{x:,.0f}" if horizontal else "%{y:,.0f}",
+                textposition="outside",
+                cliponaxis=False,
+                hovertemplate=(
+                    "%{fullData.name}<br>%{y}<br>%{x:,.0f}<extra></extra>"
+                    if horizontal
+                    else "%{fullData.name}<br>%{x}<br>%{y:,.0f}<extra></extra>"
+                ),
+            )
+        elif trace.type == "pie":
+            trace.update(
+                texttemplate="%{value:,.0f}<br>%{percent:.0%}",
+                textposition="inside",
+                hovertemplate=(
+                    "%{label}<br>%{value:,.0f}<br>%{percent:.0%}<extra></extra>"
+                ),
+            )
+        elif trace.type == "sunburst":
+            trace.update(
+                texttemplate="%{label}<br>%{value:,.0f}",
+                hovertemplate="%{label}<br>%{value:,.0f}<extra></extra>",
+            )
+
+
 class FormulaError(ValueError):
     pass
 
@@ -792,6 +841,7 @@ def render_downloadable_chart(
     file_stem: str,
 ) -> None:
     """Render a chart with consistent PNG, CSV and interactive HTML exports."""
+    apply_chart_number_format(figure)
     st.plotly_chart(
         figure,
         width="stretch",
@@ -1224,7 +1274,7 @@ with period_tab:
             columns={"entity_name": "Banka / kurum", "value": "Değer", "unit": "Birim"}
         )
         with table_tab:
-            st.dataframe(period_table, width="stretch", hide_index=True)
+            st.dataframe(display_table(period_table), width="stretch", hide_index=True)
             st.download_button(
                 "Dönemsel analiz verisini CSV indir",
                 period_table.to_csv(index=False).encode("utf-8-sig"),
@@ -1475,14 +1525,7 @@ with time_tab:
                     f"time_endpoint_chart_{chart_type}",
                     "tbb_zaman_baslangic_bitis",
                 )
-            st.dataframe(
-                summary,
-                width="stretch",
-                hide_index=True,
-                column_config={
-                    "Değişim (%)": st.column_config.NumberColumn(format="%.2f%%")
-                },
-            )
+            st.dataframe(display_table(summary), width="stretch", hide_index=True)
             st.download_button(
                 "Başlangıç–bitiş tablosunu CSV indir",
                 summary.to_csv(index=False).encode("utf-8-sig"),
@@ -1511,15 +1554,7 @@ with time_tab:
         )
         with table_tab:
             st.markdown("**Ara dönemler dahil tüm kayıtlar**")
-            st.dataframe(
-                detail,
-                width="stretch",
-                hide_index=True,
-                column_config={
-                    "Çeyreklik değişim (%)": st.column_config.NumberColumn(format="%.2f%%"),
-                    "Yıllık değişim (%)": st.column_config.NumberColumn(format="%.2f%%"),
-                },
-            )
+            st.dataframe(display_table(detail), width="stretch", hide_index=True)
             st.download_button(
                 "Zaman analizi verisini CSV indir",
                 detail.to_csv(index=False).encode("utf-8-sig"),
@@ -1770,7 +1805,9 @@ with calculator_tab:
         with table_tab:
             if formula_error:
                 st.error(formula_error)
-            st.dataframe(calculator_table, width="stretch", hide_index=True)
+            st.dataframe(
+                display_table(calculator_table), width="stretch", hide_index=True
+            )
             st.download_button(
                 "Hesaplama sonucunu CSV indir",
                 calculator_table.to_csv(index=False).encode("utf-8-sig"),
@@ -1873,6 +1910,8 @@ with simulation_tab:
             key="simulation_metric_b",
             on_change=reset_simulation_scope,
         )
+        simulation_metric_a_name = calculator_lookup[simulation_metric_a]
+        simulation_metric_b_name = calculator_lookup[simulation_metric_b]
         simulation_entity_type = s3.radio(
             "Karşılaştırma düzeyi",
             list(ENTITY_LABELS),
@@ -1880,6 +1919,9 @@ with simulation_tab:
             horizontal=True,
             key="simulation_entity_type",
             on_change=reset_simulation_scope,
+        )
+        st.caption(
+            f"Pay: {simulation_metric_a_name} • Payda: {simulation_metric_b_name}"
         )
 
     simulation_a = load_series(simulation_metric_a, simulation_entity_type).copy()
@@ -1946,7 +1988,7 @@ with simulation_tab:
 
         shock_a_col, shock_b_col = st.columns(2)
         shock_a = shock_a_col.number_input(
-            "Metrik A değişimi (%)",
+            f"{simulation_metric_a_name} değişimi (%)",
             min_value=-100.0,
             max_value=1000.0,
             value=0.0,
@@ -1955,7 +1997,7 @@ with simulation_tab:
             key="simulation_shock_a",
         )
         shock_b = shock_b_col.number_input(
-            "Metrik B değişimi (%)",
+            f"{simulation_metric_b_name} değişimi (%)",
             min_value=-100.0,
             max_value=1000.0,
             value=0.0,
@@ -2112,8 +2154,10 @@ with simulation_tab:
                 columns={
                     "period_label": "Dönem",
                     "entity_name": "Banka / kurum",
-                    "Metrik A": "Metrik A (mevcut)",
-                    "Metrik B": "Metrik B (mevcut)",
+                    "Metrik A": f"Pay — {simulation_metric_a_name} (mevcut)",
+                    "Simüle Metrik A": f"Pay — {simulation_metric_a_name} (simüle)",
+                    "Metrik B": f"Payda — {simulation_metric_b_name} (mevcut)",
+                    "Simüle Metrik B": f"Payda — {simulation_metric_b_name} (simüle)",
                 }
             )
             render_downloadable_chart(
@@ -2155,19 +2199,21 @@ with simulation_tab:
                 r1, r2, r3, r4 = st.columns(4)
                 r1.metric("Bitiş dönemi", last_row["period_label"])
                 r2.metric(
-                    "Metrik A (simüle)", number_tr(last_row["Simüle Metrik A"], 2)
+                    f"{simulation_metric_a_name} (simüle)",
+                    number_tr(last_row["Simüle Metrik A"]),
                 )
                 r3.metric(
-                    "Metrik B (simüle)", number_tr(last_row["Simüle Metrik B"], 2)
+                    f"{simulation_metric_b_name} (simüle)",
+                    number_tr(last_row["Simüle Metrik B"]),
                 )
                 r4.metric(
                     "Simüle oran",
                     (
-                        f"%{number_tr(last_row['Simülasyon'], 2)}"
+                        f"%{number_tr(last_row['Simülasyon'])}"
                         if multiplier == 100
-                        else number_tr(last_row["Simülasyon"], 4)
+                        else number_tr(last_row["Simülasyon"])
                     ),
-                    delta=f"%{number_tr(last_row['Değişim (%)'], 2)}",
+                    delta=f"%{number_tr(last_row['Değişim (%)'])}",
                 )
                 simulation_chart(
                     single_scenario,
@@ -2206,23 +2252,27 @@ with simulation_tab:
                     columns={
                         "period_label": "Dönem",
                         "entity_name": "Banka / kurum",
-                        "Metrik A": "Metrik A (mevcut)",
-                        "Metrik B": "Metrik B (mevcut)",
+                        "Metrik A": f"Pay — {simulation_metric_a_name} (mevcut)",
+                        "Simüle Metrik A": f"Pay — {simulation_metric_a_name} (simüle)",
+                        "Metrik B": f"Payda — {simulation_metric_b_name} (mevcut)",
+                        "Simüle Metrik B": f"Payda — {simulation_metric_b_name} (simüle)",
                     }
                 )[
                     [
                         "Dönem",
                         "Banka / kurum",
-                        "Metrik A (mevcut)",
-                        "Simüle Metrik A",
-                        "Metrik B (mevcut)",
-                        "Simüle Metrik B",
+                        f"Pay — {simulation_metric_a_name} (mevcut)",
+                        f"Pay — {simulation_metric_a_name} (simüle)",
+                        f"Payda — {simulation_metric_b_name} (mevcut)",
+                        f"Payda — {simulation_metric_b_name} (simüle)",
                         "Mevcut",
                         "Simülasyon",
                         "Değişim (%)",
                     ]
                 ]
-                st.dataframe(simulation_table, width="stretch", hide_index=True)
+                st.dataframe(
+                    display_table(simulation_table), width="stretch", hide_index=True
+                )
                 st.download_button(
                     "Simülasyon verisini CSV indir",
                     simulation_table.to_csv(index=False).encode("utf-8-sig"),
