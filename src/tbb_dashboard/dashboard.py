@@ -33,14 +33,14 @@ SOURCE_LABELS = {
 ENTITY_LABELS = {"bank": "Bankalar", "group": "Banka Grupları"}
 COLORS = [
     "#2563EB",  # mavi
-    "#4056D6",  # indigo-mavi
-    "#5B4BC4",  # mavi-mor
     "#7C3AED",  # mor
-    "#6950B5",  # mor-petrol geçişi
-    "#52659F",  # arduvaz mavisi
-    "#367C91",  # petrol mavisi
-    "#1F827E",  # petrol turkuazı
     "#0F6F68",  # petrol yeşili
+    "#4056D6",  # indigo-mavi
+    "#1F827E",  # petrol turkuazı
+    "#6950B5",  # mor-petrol geçişi
+    "#367C91",  # petrol mavisi
+    "#5B4BC4",  # mavi-mor
+    "#52659F",  # arduvaz mavisi
 ]
 CONTINUOUS_COLORS = [
     "#2563EB",
@@ -712,6 +712,10 @@ def make_time_figure(
             hole=0.38,
             color_discrete_sequence=COLORS,
         )
+        figure.update_traces(
+            texttemplate="%{value:,.2f}<br>%{percent:.1%}",
+            textposition="inside",
+        )
     else:
         options = dict(
             data_frame=chart_data,
@@ -730,6 +734,17 @@ def make_time_figure(
             if chart_type == "Çizgi"
             else px.bar(**options, barmode="group")
         )
+        if chart_type == "Çizgi":
+            figure.update_traces(
+                texttemplate="%{y:,.2f}",
+                textposition="top center",
+            )
+        else:
+            figure.update_traces(
+                texttemplate="%{y:,.2f}",
+                textposition="outside",
+                cliponaxis=False,
+            )
         figure.update_xaxes(
             tickvals=periods,
             ticktext=[period_labels[item] for item in periods],
@@ -744,6 +759,26 @@ def make_time_figure(
         paper_bgcolor="white",
     )
     return figure
+
+
+def add_snapshot_value_labels(figure, chart_type: str) -> None:
+    """Keep snapshot values visible without requiring hover interaction."""
+    if chart_type == "Daire":
+        figure.update_traces(
+            texttemplate="%{value:,.2f}<br>%{percent:.1%}",
+            textposition="inside",
+        )
+    elif chart_type == "Çizgi":
+        figure.update_traces(
+            texttemplate="%{y:,.2f}",
+            textposition="top center",
+        )
+    else:
+        figure.update_traces(
+            texttemplate="%{x:,.2f}",
+            textposition="outside",
+            cliponaxis=False,
+        )
 
 
 def render_downloadable_chart(
@@ -1109,8 +1144,10 @@ with period_tab:
                     color_continuous_scale=CONTINUOUS_COLORS,
                 )
                 systemic_figure.update_layout(coloraxis_showscale=False)
+            add_snapshot_value_labels(systemic_figure, chart_type)
             systemic_figure.update_layout(
                 height=520,
+                margin=dict(l=10, r=70, t=55, b=10),
                 title=(
                     f"{context['period_labels'][analysis_date]} • Sistemik öneme "
                     "sahip 9 banka"
@@ -1121,7 +1158,7 @@ with period_tab:
             render_downloadable_chart(
                 systemic_figure,
                 standard_export_frame(systemic_snapshot),
-                "period_systemic_chart",
+                f"period_systemic_chart_{chart_type}",
                 "tbb_donemsel_sistemik_9_banka",
             )
         with single_chart_tab:
@@ -1159,11 +1196,24 @@ with period_tab:
                     )
                     figure.update_xaxes(tickangle=-25)
                     figure.update_layout(coloraxis_showscale=False)
-                figure.update_layout(height=500, plot_bgcolor="white", paper_bgcolor="white")
+                if chart_type == "Sütun":
+                    figure.update_traces(
+                        texttemplate="%{y:,.2f}",
+                        textposition="outside",
+                        cliponaxis=False,
+                    )
+                else:
+                    add_snapshot_value_labels(figure, chart_type)
+                figure.update_layout(
+                    height=500,
+                    margin=dict(l=10, r=35, t=35, b=10),
+                    plot_bgcolor="white",
+                    paper_bgcolor="white",
+                )
                 render_downloadable_chart(
                     figure,
                     standard_export_frame(snapshot),
-                    "period_single_chart",
+                    f"period_single_chart_{chart_type}",
                     "tbb_donemsel_secilen_bankalar",
                 )
         period_table = ranking_all[["Sıra", "entity_name", "value", "unit"]].rename(
@@ -1295,7 +1345,7 @@ with time_tab:
                 render_downloadable_chart(
                     systemic_figure,
                     standard_export_frame(systemic_data),
-                    "time_systemic_chart",
+                    f"time_systemic_chart_{chart_type}",
                     "tbb_zaman_sistemik_9_banka",
                 )
         with trend_tab:
@@ -1311,11 +1361,14 @@ with time_tab:
                     color="period_label",
                     color_discrete_sequence=COLORS,
                 )
+                figure.update_traces(
+                    texttemplate="%{label}<br>%{value:,.2f}",
+                )
                 figure.update_layout(height=580)
                 render_downloadable_chart(
                     figure,
                     standard_export_frame(comparison_data),
-                    "time_trend_chart",
+                    f"time_trend_chart_{chart_type}",
                     "tbb_zaman_donem_seyri",
                 )
             else:
@@ -1331,7 +1384,7 @@ with time_tab:
                 render_downloadable_chart(
                     figure,
                     standard_export_frame(comparison_data),
-                    "time_trend_chart",
+                    f"time_trend_chart_{chart_type}",
                     "tbb_zaman_donem_seyri",
                 )
         for tab, column, label, empty_text in (
@@ -1364,7 +1417,7 @@ with time_tab:
                     render_downloadable_chart(
                         figure,
                         standard_export_frame(analysis_data, [column]),
-                        f"time_{column}_chart",
+                        f"time_{column}_chart_{chart_type}",
                         f"tbb_zaman_{column}",
                     )
         comparison = endpoints.pivot_table(
@@ -1406,7 +1459,7 @@ with time_tab:
                 render_downloadable_chart(
                     endpoint_figure,
                     standard_export_frame(endpoints),
-                    "time_endpoint_chart",
+                    f"time_endpoint_chart_{chart_type}",
                     "tbb_zaman_baslangic_bitis",
                 )
             st.dataframe(
@@ -1684,7 +1737,7 @@ with calculator_tab:
                             calculation,
                             [*selected_metrics.keys(), "result"],
                         ),
-                        "calculator_result_chart",
+                        f"calculator_result_chart_{chart_type}",
                         "tbb_ozellestirilebilir_metrik_grafigi",
                     )
 
@@ -2019,6 +2072,17 @@ with simulation_tab:
                 paper_bgcolor="white",
                 legend_title_text="",
             )
+            if simulation_chart_type == "Çizgi":
+                figure.update_traces(
+                    texttemplate="%{y:,.2f}",
+                    textposition="top center",
+                )
+            else:
+                figure.update_traces(
+                    texttemplate="%{y:,.2f}",
+                    textposition="outside",
+                    cliponaxis=False,
+                )
             simulation_export = frame[
                 [
                     "period_label",
@@ -2042,7 +2106,7 @@ with simulation_tab:
             render_downloadable_chart(
                 figure,
                 simulation_export,
-                key,
+                f"{key}_{simulation_chart_type}",
                 (
                     "tbb_metrik_simulasyonu_coklu_banka"
                     if multiple
