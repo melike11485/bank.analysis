@@ -31,8 +31,25 @@ SOURCE_LABELS = {
     "nazim": "Nazım Hesaplar",
 }
 ENTITY_LABELS = {"bank": "Bankalar", "group": "Banka Grupları"}
-COLORS = ["#2563EB", "#7C3AED", "#059669"]
-CONTINUOUS_COLORS = ["#2563EB", "#7C3AED", "#059669"]
+COLORS = [
+    "#2563EB",  # mavi
+    "#4056D6",  # indigo-mavi
+    "#5B4BC4",  # mavi-mor
+    "#7C3AED",  # mor
+    "#6950B5",  # mor-petrol geçişi
+    "#52659F",  # arduvaz mavisi
+    "#367C91",  # petrol mavisi
+    "#1F827E",  # petrol turkuazı
+    "#0F6F68",  # petrol yeşili
+]
+CONTINUOUS_COLORS = [
+    "#2563EB",
+    "#4056D6",
+    "#7C3AED",
+    "#52659F",
+    "#367C91",
+    "#0F6F68",
+]
 SOURCE_AVAILABILITY_NOTES = {
     ("pasifler", "ser_benz", "summary_available"): (
         "Ayrıntılı Ser.Benz. sayfası kaynak dönemde yayımlanmamış; toplam değer "
@@ -1842,7 +1859,7 @@ with simulation_tab:
                         y="Sonuç",
                         color="Senaryo",
                         markers=True,
-                        color_discrete_sequence=COLORS[:2],
+                        color_discrete_sequence=[COLORS[0], COLORS[3]],
                         labels={"period_label": "Dönem", "Sonuç": operation},
                     )
             elif multiple:
@@ -1867,7 +1884,7 @@ with simulation_tab:
                     y="Sonuç",
                     color="Senaryo",
                     barmode="group",
-                    color_discrete_sequence=COLORS[:2],
+                    color_discrete_sequence=[COLORS[0], COLORS[3]],
                     labels={"period_label": "Dönem", "Sonuç": operation},
                 )
             figure.update_layout(
