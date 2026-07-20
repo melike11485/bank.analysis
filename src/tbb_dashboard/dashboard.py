@@ -205,6 +205,19 @@ def reset_chart(namespace: str) -> None:
     st.session_state.pop(f"{namespace}_chart_type", None)
 
 
+def reset_simulation_scope() -> None:
+    for key in (
+        "simulation_start_period",
+        "simulation_end_period",
+        "simulation_entity",
+    ):
+        st.session_state.pop(key, None)
+
+
+def reset_simulation_end() -> None:
+    st.session_state.pop("simulation_end_period", None)
+
+
 def sync_entity_filter(
     selection_key: str,
     checkbox_key: str,
@@ -1611,7 +1624,7 @@ with simulation_tab:
     st.subheader("Metrik simülasyonu")
     st.caption(
         "İki metriğin oranını seçin; metriklere yüzdesel şok uygulayarak "
-        "senaryo sonucunu anında karşılaştırın."
+        "senaryo sonucunu birden fazla dönem boyunca karşılaştırın."
     )
     with st.container(border=True):
         st.markdown("#### Simülasyon ayarları")
@@ -1626,6 +1639,7 @@ with simulation_tab:
             ),
             format_func=lambda item: calculator_lookup[item],
             key="simulation_metric_a",
+            on_change=reset_simulation_scope,
         )
         simulation_metric_b = s2.selectbox(
             "Metrik B (payda)",
@@ -1637,6 +1651,7 @@ with simulation_tab:
             ),
             format_func=lambda item: calculator_lookup[item],
             key="simulation_metric_b",
+            on_change=reset_simulation_scope,
         )
         simulation_entity_type = s3.radio(
             "Karşılaştırma düzeyi",
@@ -1644,6 +1659,7 @@ with simulation_tab:
             format_func=lambda item: ENTITY_LABELS[item],
             horizontal=True,
             key="simulation_entity_type",
+            on_change=reset_simulation_scope,
         )
 
     simulation_a = load_series(simulation_metric_a, simulation_entity_type).copy()
@@ -1670,30 +1686,52 @@ with simulation_tab:
             .set_index("period_end")["period_label"]
             .to_dict()
         )
-        f1, f2, f3 = st.columns([1, 2, 2])
-        simulation_period = f1.selectbox(
-            "Simülasyon dönemi",
+        december_2023 = pd.Timestamp("2023-12-31")
+        default_start_index = (
+            simulation_periods.index(december_2023)
+            if december_2023 in simulation_periods
+            else 0
+        )
+        f1, f2, f3 = st.columns([1, 1, 2])
+        simulation_start = f1.selectbox(
+            "Başlangıç dönemi",
             simulation_periods,
-            index=len(simulation_periods) - 1,
+            index=default_start_index,
             format_func=lambda item: simulation_labels[item],
-            key="simulation_period",
+            key="simulation_start_period",
+            on_change=reset_simulation_end,
+        )
+        end_periods = [period for period in simulation_periods if period >= simulation_start]
+        simulation_end = f2.selectbox(
+            "Bitiş dönemi",
+            end_periods,
+            index=len(end_periods) - 1,
+            format_func=lambda item: simulation_labels[item],
+            key="simulation_end_period",
         )
         default_entity = (
             "Türkiye Halk Bankası A.Ş."
             if "Türkiye Halk Bankası A.Ş." in simulation_entities
             else simulation_entities[0]
         )
-        simulation_entity = f2.selectbox(
+        simulation_entity = f3.selectbox(
             "Banka / kurum",
             simulation_entities,
             index=simulation_entities.index(default_entity),
             key="simulation_entity",
         )
-        operation = f3.radio(
+        operation_col, chart_col = st.columns([2, 1])
+        operation = operation_col.radio(
             "Hesaplama",
             ["Oran (A / B)", "Yüzde oran ((A / B) × 100)"],
             horizontal=True,
             key="simulation_operation",
+        )
+        simulation_chart_type = chart_col.radio(
+            "Grafik türü",
+            ["Çizgi", "Sütun"],
+            horizontal=True,
+            key="simulation_chart_type",
         )
 
         shock_a_col, shock_b_col = st.columns(2)
@@ -1716,79 +1754,102 @@ with simulation_tab:
             key="simulation_shock_b",
         )
 
-        def selected_value(frame: pd.DataFrame) -> float | None:
-            values = frame[
-                (frame["period_end"] == simulation_period)
-                & (frame["entity_name"] == simulation_entity)
-            ]["value"]
-            return float(values.iloc[0]) if not values.empty else None
-
-        base_a = selected_value(simulation_a)
-        base_b = selected_value(simulation_b)
-        if base_a is None or base_b is None:
-            st.warning("Seçilen banka ve dönemde iki metrik birlikte bulunmuyor.")
-        elif base_b == 0:
-            st.error("Metrik B sıfır olduğu için oran hesaplanamıyor.")
+        selected_a = simulation_a[
+            (simulation_a["entity_name"] == simulation_entity)
+            & (simulation_a["period_end"] >= simulation_start)
+            & (simulation_a["period_end"] <= simulation_end)
+        ][["period_end", "period_label", "value"]].rename(columns={"value": "Metrik A"})
+        selected_b = simulation_b[
+            (simulation_b["entity_name"] == simulation_entity)
+            & (simulation_b["period_end"] >= simulation_start)
+            & (simulation_b["period_end"] <= simulation_end)
+        ][["period_end", "value"]].rename(columns={"value": "Metrik B"})
+        scenario = selected_a.merge(selected_b, on="period_end", how="inner")
+        scenario = scenario.sort_values("period_end")
+        scenario = scenario[scenario["Metrik B"] != 0].copy()
+        scenario["Simüle Metrik A"] = scenario["Metrik A"] * (1 + shock_a / 100)
+        scenario["Simüle Metrik B"] = scenario["Metrik B"] * (1 + shock_b / 100)
+        scenario = scenario[scenario["Simüle Metrik B"] != 0].copy()
+        if scenario.empty:
+            st.warning(
+                "Seçilen banka ve dönem aralığında iki metrik birlikte bulunmuyor "
+                "veya payda sıfır."
+            )
         else:
-            simulated_a = base_a * (1 + shock_a / 100)
-            simulated_b = base_b * (1 + shock_b / 100)
-            if simulated_b == 0:
-                st.error("Simülasyon sonrası Metrik B sıfır; oran hesaplanamıyor.")
+            multiplier = 100 if operation.startswith("Yüzde") else 1
+            scenario["Mevcut"] = (
+                scenario["Metrik A"] / scenario["Metrik B"] * multiplier
+            )
+            scenario["Simülasyon"] = (
+                scenario["Simüle Metrik A"]
+                / scenario["Simüle Metrik B"]
+                * multiplier
+            )
+            scenario["Değişim (%)"] = (
+                scenario["Simülasyon"] / scenario["Mevcut"] - 1
+            ) * 100
+            last_row = scenario.iloc[-1]
+            r1, r2, r3, r4 = st.columns(4)
+            r1.metric("Bitiş dönemi", last_row["period_label"])
+            r2.metric("Metrik A (simüle)", number_tr(last_row["Simüle Metrik A"], 2))
+            r3.metric("Metrik B (simüle)", number_tr(last_row["Simüle Metrik B"], 2))
+            r4.metric(
+                "Simüle oran",
+                (
+                    f"%{number_tr(last_row['Simülasyon'], 2)}"
+                    if multiplier == 100
+                    else number_tr(last_row["Simülasyon"], 4)
+                ),
+                delta=f"%{number_tr(last_row['Değişim (%)'], 2)}",
+            )
+            chart_data = scenario.melt(
+                id_vars=["period_end", "period_label"],
+                value_vars=["Mevcut", "Simülasyon"],
+                var_name="Senaryo",
+                value_name="Sonuç",
+            )
+            chart_function = px.line if simulation_chart_type == "Çizgi" else px.bar
+            chart_options = {
+                "data_frame": chart_data,
+                "x": "period_label",
+                "y": "Sonuç",
+                "color": "Senaryo",
+                "color_discrete_sequence": ["#87BFF0", "#0F4C81"],
+                "labels": {"period_label": "Dönem", "Sonuç": operation},
+            }
+            if simulation_chart_type == "Çizgi":
+                chart_options["markers"] = True
             else:
-                multiplier = 100 if operation.startswith("Yüzde") else 1
-                base_result = base_a / base_b * multiplier
-                simulated_result = simulated_a / simulated_b * multiplier
-                result_change = (
-                    (simulated_result / base_result - 1) * 100
-                    if base_result != 0
-                    else pd.NA
-                )
-                r1, r2, r3, r4 = st.columns(4)
-                r1.metric("Metrik A (simüle)", number_tr(simulated_a, 2))
-                r2.metric("Metrik B (simüle)", number_tr(simulated_b, 2))
-                r3.metric(
-                    "Mevcut oran",
-                    (
-                        f"%{number_tr(base_result, 2)}"
-                        if multiplier == 100
-                        else number_tr(base_result, 4)
-                    ),
-                )
-                r4.metric(
-                    "Simüle oran",
-                    (
-                        f"%{number_tr(simulated_result, 2)}"
-                        if multiplier == 100
-                        else number_tr(simulated_result, 4)
-                    ),
-                    delta=(
-                        None
-                        if pd.isna(result_change)
-                        else f"%{number_tr(result_change, 2)}"
-                    ),
-                )
-                scenario = pd.DataFrame(
-                    {
-                        "Senaryo": ["Mevcut", "Simülasyon"],
-                        "Sonuç": [base_result, simulated_result],
-                    }
-                )
-                simulation_figure = px.bar(
-                    scenario,
-                    x="Senaryo",
-                    y="Sonuç",
-                    color="Senaryo",
-                    color_discrete_sequence=["#87BFF0", "#0F4C81"],
-                    labels={"Sonuç": operation},
-                )
-                simulation_figure.update_layout(
-                    height=380,
-                    showlegend=False,
-                    plot_bgcolor="white",
-                    paper_bgcolor="white",
-                )
-                st.plotly_chart(
-                    simulation_figure,
-                    width="stretch",
-                    key="metric_simulation_chart",
-                )
+                chart_options["barmode"] = "group"
+            simulation_figure = chart_function(**chart_options)
+            simulation_figure.update_layout(
+                height=420,
+                plot_bgcolor="white",
+                paper_bgcolor="white",
+                legend_title_text="",
+            )
+            st.plotly_chart(
+                simulation_figure,
+                width="stretch",
+                key="metric_simulation_chart",
+            )
+            simulation_table = scenario.rename(
+                columns={
+                    "period_label": "Dönem",
+                    "Metrik A": "Metrik A (mevcut)",
+                    "Metrik B": "Metrik B (mevcut)",
+                }
+            )[
+                [
+                    "Dönem",
+                    "Metrik A (mevcut)",
+                    "Simüle Metrik A",
+                    "Metrik B (mevcut)",
+                    "Simüle Metrik B",
+                    "Mevcut",
+                    "Simülasyon",
+                    "Değişim (%)",
+                ]
+            ]
+            with st.expander("Simülasyon veri tablosu"):
+                st.dataframe(simulation_table, width="stretch", hide_index=True)
