@@ -31,7 +31,8 @@ SOURCE_LABELS = {
     "nazim": "Nazım Hesaplar",
 }
 ENTITY_LABELS = {"bank": "Bankalar", "group": "Banka Grupları"}
-COLORS = ["#082F57", "#0F4C81", "#1769AA", "#2F80D1", "#5FA8E8", "#87BFF0"]
+COLORS = ["#2563EB", "#7C3AED", "#059669"]
+CONTINUOUS_COLORS = ["#2563EB", "#7C3AED", "#059669"]
 SOURCE_AVAILABILITY_NOTES = {
     ("pasifler", "ser_benz", "summary_available"): (
         "Ayrıntılı Ser.Benz. sayfası kaynak dönemde yayımlanmamış; toplam değer "
@@ -596,25 +597,36 @@ def render_quality(
     success_text: str,
     quality_key: str,
 ) -> None:
+    if not periods or not entities:
+        st.info("Veri kalitesini ölçmek için en az bir dönem ve banka/kurum seçin.")
+        return
+
+    scoped = frame[
+        frame["period_end"].isin(periods) & frame["entity_name"].isin(entities)
+    ].copy()
     expected_index = pd.MultiIndex.from_product(
         [periods, list(dict.fromkeys(entities))],
         names=["period_end", "entity_name"],
     )
     actual_index = pd.MultiIndex.from_frame(
-        frame[["period_end", "entity_name"]].drop_duplicates()
+        scoped.dropna(subset=["value"])[
+            ["period_end", "entity_name"]
+        ].drop_duplicates()
     )
     missing_index = expected_index.difference(actual_index)
     expected_count = len(expected_index)
-    actual_count = len(actual_index)
+    actual_count = len(expected_index.intersection(actual_index))
     coverage = actual_count / expected_count * 100 if expected_count else 0
-    duplicates = int(frame.duplicated(["period_end", "entity_name"]).sum())
-    null_values = int(frame["value"].isna().sum())
+    duplicates = int(scoped.duplicated(["period_end", "entity_name"]).sum())
+    null_values = int(scoped["value"].isna().sum())
     q1, q2, q3, q4 = st.columns(4)
     q1.metric("Beklenen kayıt", number_tr(expected_count))
     q2.metric("Mevcut kayıt", number_tr(actual_count))
     q3.metric("Kapsama oranı", f"%{number_tr(coverage, 1)}")
     q4.metric("Eksik kayıt", number_tr(len(missing_index)))
     st.caption(f"Tekrarlanan kayıt: {duplicates} • Boş değer: {null_values}")
+    if duplicates:
+        st.warning(f"Aynı dönem ve kurum için {duplicates:,} yinelenen kayıt bulundu.")
     if len(missing_index):
         missing_table = missing_index.to_frame(index=False)
         missing_table["Dönem"] = missing_table["period_end"].map(period_labels)
@@ -983,7 +995,7 @@ with period_tab:
                 orientation="h",
                 labels={"entity_name": "", "value": unit},
                 color="value",
-                color_continuous_scale=["#DCECF9", "#082F57"],
+                color_continuous_scale=CONTINUOUS_COLORS,
             )
             systemic_figure.update_layout(
                 height=520,
@@ -1021,7 +1033,7 @@ with period_tab:
                         y="value",
                         markers=True,
                         labels={"entity_name": "Banka / kurum", "value": unit},
-                        color_discrete_sequence=["#0F4C81"],
+                        color_discrete_sequence=[COLORS[0]],
                     )
                     figure.update_xaxes(tickangle=-25)
                 else:
@@ -1031,7 +1043,7 @@ with period_tab:
                         y="value",
                         labels={"entity_name": "Banka / kurum", "value": unit},
                         color="value",
-                        color_continuous_scale=["#DCECF9", "#082F57"],
+                        color_continuous_scale=CONTINUOUS_COLORS,
                     )
                     figure.update_xaxes(tickangle=-25)
                     figure.update_layout(coloraxis_showscale=False)
@@ -1482,7 +1494,7 @@ with calculator_tab:
                 ["period_end", "entity_name"]
             )
             actual_indexes[alias] = pd.MultiIndex.from_frame(
-                scope[["period_end", "entity_name"]]
+                scope.dropna(subset=["value"])[["period_end", "entity_name"]]
             )
             calculation = calculation.merge(
                 scope.rename(columns={"value": alias}),
@@ -1816,6 +1828,7 @@ with simulation_tab:
                         color="entity_name",
                         line_dash="Senaryo",
                         markers=True,
+                        color_discrete_sequence=COLORS,
                         labels={
                             "period_label": "Dönem",
                             "Sonuç": operation,
@@ -1829,7 +1842,7 @@ with simulation_tab:
                         y="Sonuç",
                         color="Senaryo",
                         markers=True,
-                        color_discrete_sequence=["#87BFF0", "#0F4C81"],
+                        color_discrete_sequence=COLORS[:2],
                         labels={"period_label": "Dönem", "Sonuç": operation},
                     )
             elif multiple:
@@ -1840,6 +1853,7 @@ with simulation_tab:
                     color="entity_name",
                     pattern_shape="Senaryo",
                     barmode="group",
+                    color_discrete_sequence=COLORS,
                     labels={
                         "period_label": "Dönem",
                         "Sonuç": operation,
@@ -1853,7 +1867,7 @@ with simulation_tab:
                     y="Sonuç",
                     color="Senaryo",
                     barmode="group",
-                    color_discrete_sequence=["#87BFF0", "#0F4C81"],
+                    color_discrete_sequence=COLORS[:2],
                     labels={"period_label": "Dönem", "Sonuç": operation},
                 )
             figure.update_layout(
@@ -1933,6 +1947,9 @@ with simulation_tab:
                 )
 
         with simulation_table_tab:
+            st.caption(
+                "Tablo, ‘Birden fazla banka’ sekmesindeki banka/kurum seçimini kullanır."
+            )
             if not multi_entities:
                 st.info("Veri tablosu için çoklu banka sekmesinden seçim yapın.")
             else:
@@ -1966,6 +1983,11 @@ with simulation_tab:
                 )
 
         with simulation_quality_tab:
+            st.caption(
+                "Kontrol, ‘Birden fazla banka’ sekmesindeki banka/kurum seçimini kullanır."
+            )
+            if not multi_entities:
+                st.info("Veri kalitesini ölçmek için çoklu banka sekmesinden seçim yapın.")
             selected_periods = [
                 period
                 for period in simulation_periods
@@ -1976,14 +1998,16 @@ with simulation_tab:
                 names=["period_end", "entity_name"],
             )
             missing_parts = []
-            for metric_label, metric_frame in (
-                ("Metrik A", scope_a),
-                ("Metrik B", scope_b),
+            for metric_label, metric_frame, value_column in (
+                ("Metrik A", scope_a, "Metrik A"),
+                ("Metrik B", scope_b, "Metrik B"),
             ):
                 actual = pd.MultiIndex.from_frame(
                     metric_frame[
                         metric_frame["entity_name"].isin(multi_entities)
-                    ][["period_end", "entity_name"]].drop_duplicates()
+                    ].dropna(subset=[value_column])[
+                        ["period_end", "entity_name"]
+                    ].drop_duplicates()
                 )
                 missing = expected.difference(actual)
                 if len(missing):
@@ -2019,7 +2043,29 @@ with simulation_tab:
                 )[["Dönem", "Banka / kurum", "Eksik alan"]]
                 st.warning("Simülasyon kapsamında eksik metrik kayıtları var.")
                 st.dataframe(missing_table, width="stretch", hide_index=True)
+                st.download_button(
+                    "Eksik kayıt listesini CSV indir",
+                    missing_table.to_csv(index=False).encode("utf-8-sig"),
+                    file_name="tbb_metrik_simulasyonu_eksikleri.csv",
+                    mime="text/csv",
+                    key="simulation_missing_download",
+                )
             elif len(zero_denominators):
                 st.warning("Eksik kayıt yok; ancak oranı engelleyen sıfır paydalar var.")
-            else:
+            elif multi_entities:
                 st.success("Seçilen simülasyon kapsamında eksik kayıt yok.")
+            if len(zero_denominators):
+                zero_table = zero_denominators.copy()
+                zero_table["Dönem"] = zero_table["period_end"].map(simulation_labels)
+                zero_table = zero_table.rename(
+                    columns={"entity_name": "Banka / kurum"}
+                )[["Dönem", "Banka / kurum"]]
+                st.markdown("##### Sıfır payda listesi")
+                st.dataframe(zero_table, width="stretch", hide_index=True)
+                st.download_button(
+                    "Sıfır payda listesini CSV indir",
+                    zero_table.to_csv(index=False).encode("utf-8-sig"),
+                    file_name="tbb_metrik_simulasyonu_sifir_payda.csv",
+                    mime="text/csv",
+                    key="simulation_zero_denominator_download",
+                )
