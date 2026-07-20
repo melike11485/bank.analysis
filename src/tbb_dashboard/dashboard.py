@@ -401,14 +401,22 @@ def render_metric_filters(
     }
 
 
-def render_chart_selector(namespace: str, default: str = "Çizgi") -> str:
+def render_chart_selector(
+    namespace: str,
+    default: str = "Sütun",
+    state_token: str | None = None,
+) -> str:
     options = ["Çizgi", "Sütun", "Daire"]
+    widget_key = f"{namespace}_chart_type"
+    if state_token:
+        token = hashlib.sha1(state_token.encode("utf-8")).hexdigest()[:12]
+        widget_key = f"{widget_key}_{token}"
     return st.radio(
         "Grafik türü",
         options,
         index=options.index(default),
         horizontal=True,
-        key=f"{namespace}_chart_type",
+        key=widget_key,
     )
 
 
@@ -1049,6 +1057,7 @@ with period_tab:
                     if context["metric_key"] == CAPITAL_ADEQUACY_METRIC
                     else "Sütun"
                 ),
+                state_token=context["metric_key"],
             )
         data = context["data"]
         unit = context["unit"]
@@ -1069,18 +1078,39 @@ with period_tab:
             systemic_snapshot = ranking_all[
                 ranking_all["entity_name"].isin(systemic_names)
             ].sort_values("value")
-            systemic_figure = px.bar(
-                systemic_snapshot,
-                x="value",
-                y="entity_name",
-                orientation="h",
-                labels={"entity_name": "", "value": unit},
-                color="value",
-                color_continuous_scale=CONTINUOUS_COLORS,
-            )
+            if chart_type == "Daire":
+                systemic_chart_data = systemic_snapshot.copy()
+                systemic_chart_data["pie_value"] = systemic_chart_data["value"].abs()
+                systemic_figure = px.pie(
+                    systemic_chart_data,
+                    names="entity_name",
+                    values="pie_value",
+                    hole=0.38,
+                    color_discrete_sequence=COLORS,
+                )
+            elif chart_type == "Çizgi":
+                systemic_figure = px.line(
+                    systemic_snapshot,
+                    x="entity_name",
+                    y="value",
+                    markers=True,
+                    labels={"entity_name": "Banka / kurum", "value": unit},
+                    color_discrete_sequence=[COLORS[0]],
+                )
+                systemic_figure.update_xaxes(tickangle=-25)
+            else:
+                systemic_figure = px.bar(
+                    systemic_snapshot,
+                    x="value",
+                    y="entity_name",
+                    orientation="h",
+                    labels={"entity_name": "", "value": unit},
+                    color="value",
+                    color_continuous_scale=CONTINUOUS_COLORS,
+                )
+                systemic_figure.update_layout(coloraxis_showscale=False)
             systemic_figure.update_layout(
                 height=520,
-                coloraxis_showscale=False,
                 title=(
                     f"{context['period_labels'][analysis_date]} • Sistemik öneme "
                     "sahip 9 banka"
@@ -1209,6 +1239,7 @@ with time_tab:
                     if context["metric_key"] == CAPITAL_ADEQUACY_METRIC
                     else "Sütun"
                 ),
+                state_token=context["metric_key"],
             )
         data = context["data"]
         comparison_periods = [item for item in dates if start_date <= item <= end_date]
@@ -1842,6 +1873,7 @@ with simulation_tab:
         simulation_chart_type = chart_col.radio(
             "Grafik türü",
             ["Çizgi", "Sütun"],
+            index=1,
             horizontal=True,
             key="simulation_chart_type",
         )
