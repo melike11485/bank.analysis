@@ -1692,7 +1692,7 @@ with simulation_tab:
             if december_2023 in simulation_periods
             else 0
         )
-        f1, f2, f3 = st.columns([1, 1, 2])
+        f1, f2 = st.columns(2)
         simulation_start = f1.selectbox(
             "Başlangıç dönemi",
             simulation_periods,
@@ -1708,17 +1708,6 @@ with simulation_tab:
             index=len(end_periods) - 1,
             format_func=lambda item: simulation_labels[item],
             key="simulation_end_period",
-        )
-        default_entity = (
-            "Türkiye Halk Bankası A.Ş."
-            if "Türkiye Halk Bankası A.Ş." in simulation_entities
-            else simulation_entities[0]
-        )
-        simulation_entity = f3.selectbox(
-            "Banka / kurum",
-            simulation_entities,
-            index=simulation_entities.index(default_entity),
-            key="simulation_entity",
         )
         operation_col, chart_col = st.columns([2, 1])
         operation = operation_col.radio(
@@ -1754,102 +1743,283 @@ with simulation_tab:
             key="simulation_shock_b",
         )
 
-        selected_a = simulation_a[
-            (simulation_a["entity_name"] == simulation_entity)
-            & (simulation_a["period_end"] >= simulation_start)
+        multiplier = 100 if operation.startswith("Yüzde") else 1
+        scope_a = simulation_a[
+            (simulation_a["period_end"] >= simulation_start)
             & (simulation_a["period_end"] <= simulation_end)
-        ][["period_end", "period_label", "value"]].rename(columns={"value": "Metrik A"})
-        selected_b = simulation_b[
-            (simulation_b["entity_name"] == simulation_entity)
-            & (simulation_b["period_end"] >= simulation_start)
+            & (simulation_a["entity_name"].isin(simulation_entities))
+        ][["period_end", "period_label", "entity_name", "value"]].rename(
+            columns={"value": "Metrik A"}
+        )
+        scope_b = simulation_b[
+            (simulation_b["period_end"] >= simulation_start)
             & (simulation_b["period_end"] <= simulation_end)
-        ][["period_end", "value"]].rename(columns={"value": "Metrik B"})
-        scenario = selected_a.merge(selected_b, on="period_end", how="inner")
-        scenario = scenario.sort_values("period_end")
-        scenario = scenario[scenario["Metrik B"] != 0].copy()
-        scenario["Simüle Metrik A"] = scenario["Metrik A"] * (1 + shock_a / 100)
-        scenario["Simüle Metrik B"] = scenario["Metrik B"] * (1 + shock_b / 100)
-        scenario = scenario[scenario["Simüle Metrik B"] != 0].copy()
-        if scenario.empty:
-            st.warning(
-                "Seçilen banka ve dönem aralığında iki metrik birlikte bulunmuyor "
-                "veya payda sıfır."
-            )
-        else:
-            multiplier = 100 if operation.startswith("Yüzde") else 1
-            scenario["Mevcut"] = (
-                scenario["Metrik A"] / scenario["Metrik B"] * multiplier
-            )
-            scenario["Simülasyon"] = (
-                scenario["Simüle Metrik A"]
-                / scenario["Simüle Metrik B"]
-                * multiplier
-            )
-            scenario["Değişim (%)"] = (
-                scenario["Simülasyon"] / scenario["Mevcut"] - 1
-            ) * 100
-            last_row = scenario.iloc[-1]
-            r1, r2, r3, r4 = st.columns(4)
-            r1.metric("Bitiş dönemi", last_row["period_label"])
-            r2.metric("Metrik A (simüle)", number_tr(last_row["Simüle Metrik A"], 2))
-            r3.metric("Metrik B (simüle)", number_tr(last_row["Simüle Metrik B"], 2))
-            r4.metric(
-                "Simüle oran",
-                (
-                    f"%{number_tr(last_row['Simülasyon'], 2)}"
-                    if multiplier == 100
-                    else number_tr(last_row["Simülasyon"], 4)
-                ),
-                delta=f"%{number_tr(last_row['Değişim (%)'], 2)}",
-            )
-            chart_data = scenario.melt(
-                id_vars=["period_end", "period_label"],
+            & (simulation_b["entity_name"].isin(simulation_entities))
+        ][["period_end", "entity_name", "value"]].rename(
+            columns={"value": "Metrik B"}
+        )
+        all_scenarios = scope_a.merge(
+            scope_b,
+            on=["period_end", "entity_name"],
+            how="inner",
+        ).sort_values(["period_end", "entity_name"])
+        all_scenarios["Simüle Metrik A"] = all_scenarios["Metrik A"] * (
+            1 + shock_a / 100
+        )
+        all_scenarios["Simüle Metrik B"] = all_scenarios["Metrik B"] * (
+            1 + shock_b / 100
+        )
+        valid_scenarios = all_scenarios[
+            (all_scenarios["Metrik B"] != 0)
+            & (all_scenarios["Simüle Metrik B"] != 0)
+        ].copy()
+        valid_scenarios["Mevcut"] = (
+            valid_scenarios["Metrik A"]
+            / valid_scenarios["Metrik B"]
+            * multiplier
+        )
+        valid_scenarios["Simülasyon"] = (
+            valid_scenarios["Simüle Metrik A"]
+            / valid_scenarios["Simüle Metrik B"]
+            * multiplier
+        )
+        valid_scenarios["Değişim (%)"] = (
+            valid_scenarios["Simülasyon"] / valid_scenarios["Mevcut"] - 1
+        ) * 100
+
+        ranking_data = valid_scenarios[
+            ["period_end", "period_label", "entity_name", "Mevcut"]
+        ].rename(columns={"Mevcut": "value"})
+        simulation_context = {
+            "data": ranking_data,
+            "all_entities": simulation_entities,
+            "metric_key": f"simulation.{simulation_metric_a}.{simulation_metric_b}",
+            "entity_type": simulation_entity_type,
+        }
+
+        def simulation_chart(frame: pd.DataFrame, key: str, multiple: bool) -> None:
+            id_columns = ["period_end", "period_label"]
+            if multiple:
+                id_columns.append("entity_name")
+            chart_data = frame.melt(
+                id_vars=id_columns,
                 value_vars=["Mevcut", "Simülasyon"],
                 var_name="Senaryo",
                 value_name="Sonuç",
             )
-            chart_function = px.line if simulation_chart_type == "Çizgi" else px.bar
-            chart_options = {
-                "data_frame": chart_data,
-                "x": "period_label",
-                "y": "Sonuç",
-                "color": "Senaryo",
-                "color_discrete_sequence": ["#87BFF0", "#0F4C81"],
-                "labels": {"period_label": "Dönem", "Sonuç": operation},
-            }
             if simulation_chart_type == "Çizgi":
-                chart_options["markers"] = True
+                if multiple:
+                    figure = px.line(
+                        chart_data,
+                        x="period_label",
+                        y="Sonuç",
+                        color="entity_name",
+                        line_dash="Senaryo",
+                        markers=True,
+                        labels={
+                            "period_label": "Dönem",
+                            "Sonuç": operation,
+                            "entity_name": "Banka / kurum",
+                        },
+                    )
+                else:
+                    figure = px.line(
+                        chart_data,
+                        x="period_label",
+                        y="Sonuç",
+                        color="Senaryo",
+                        markers=True,
+                        color_discrete_sequence=["#87BFF0", "#0F4C81"],
+                        labels={"period_label": "Dönem", "Sonuç": operation},
+                    )
+            elif multiple:
+                figure = px.bar(
+                    chart_data,
+                    x="period_label",
+                    y="Sonuç",
+                    color="entity_name",
+                    pattern_shape="Senaryo",
+                    barmode="group",
+                    labels={
+                        "period_label": "Dönem",
+                        "Sonuç": operation,
+                        "entity_name": "Banka / kurum",
+                    },
+                )
             else:
-                chart_options["barmode"] = "group"
-            simulation_figure = chart_function(**chart_options)
-            simulation_figure.update_layout(
-                height=420,
+                figure = px.bar(
+                    chart_data,
+                    x="period_label",
+                    y="Sonuç",
+                    color="Senaryo",
+                    barmode="group",
+                    color_discrete_sequence=["#87BFF0", "#0F4C81"],
+                    labels={"period_label": "Dönem", "Sonuç": operation},
+                )
+            figure.update_layout(
+                height=440,
                 plot_bgcolor="white",
                 paper_bgcolor="white",
                 legend_title_text="",
             )
-            st.plotly_chart(
-                simulation_figure,
-                width="stretch",
-                key="metric_simulation_chart",
+            st.plotly_chart(figure, width="stretch", key=key)
+
+        single_tab, multi_tab, simulation_table_tab, simulation_quality_tab = st.tabs(
+            ["Tek banka", "Birden fazla banka", "Veri tablosu", "Veri kalitesi"]
+        )
+        default_entity = (
+            "Türkiye Halk Bankası A.Ş."
+            if "Türkiye Halk Bankası A.Ş." in simulation_entities
+            else simulation_entities[0]
+        )
+        with single_tab:
+            simulation_entity = st.selectbox(
+                "Banka / kurum",
+                simulation_entities,
+                index=simulation_entities.index(default_entity),
+                key="simulation_entity",
             )
-            simulation_table = scenario.rename(
-                columns={
-                    "period_label": "Dönem",
-                    "Metrik A": "Metrik A (mevcut)",
-                    "Metrik B": "Metrik B (mevcut)",
-                }
-            )[
-                [
-                    "Dönem",
-                    "Metrik A (mevcut)",
-                    "Simüle Metrik A",
-                    "Metrik B (mevcut)",
-                    "Simüle Metrik B",
-                    "Mevcut",
-                    "Simülasyon",
-                    "Değişim (%)",
-                ]
+            single_scenario = valid_scenarios[
+                valid_scenarios["entity_name"] == simulation_entity
             ]
-            with st.expander("Simülasyon veri tablosu"):
+            if single_scenario.empty:
+                st.warning(
+                    "Seçilen banka ve dönem aralığında iki metrik birlikte "
+                    "bulunmuyor veya payda sıfır."
+                )
+            else:
+                last_row = single_scenario.iloc[-1]
+                r1, r2, r3, r4 = st.columns(4)
+                r1.metric("Bitiş dönemi", last_row["period_label"])
+                r2.metric(
+                    "Metrik A (simüle)", number_tr(last_row["Simüle Metrik A"], 2)
+                )
+                r3.metric(
+                    "Metrik B (simüle)", number_tr(last_row["Simüle Metrik B"], 2)
+                )
+                r4.metric(
+                    "Simüle oran",
+                    (
+                        f"%{number_tr(last_row['Simülasyon'], 2)}"
+                        if multiplier == 100
+                        else number_tr(last_row["Simülasyon"], 4)
+                    ),
+                    delta=f"%{number_tr(last_row['Değişim (%)'], 2)}",
+                )
+                simulation_chart(
+                    single_scenario,
+                    "metric_simulation_single_chart",
+                    multiple=False,
+                )
+
+        with multi_tab:
+            st.markdown("#### Banka/kurum filtresi")
+            multi_entities = render_entity_filter(
+                simulation_context,
+                "simulation_multi",
+                simulation_end,
+                default_selection="halkbank",
+            )
+            multi_scenario = valid_scenarios[
+                valid_scenarios["entity_name"].isin(multi_entities)
+            ]
+            if multi_scenario.empty:
+                st.warning("Çoklu simülasyon için en az bir banka/kurum seçin.")
+            else:
+                simulation_chart(
+                    multi_scenario,
+                    "metric_simulation_multi_chart",
+                    multiple=True,
+                )
+
+        with simulation_table_tab:
+            if not multi_entities:
+                st.info("Veri tablosu için çoklu banka sekmesinden seçim yapın.")
+            else:
+                simulation_table = multi_scenario.rename(
+                    columns={
+                        "period_label": "Dönem",
+                        "entity_name": "Banka / kurum",
+                        "Metrik A": "Metrik A (mevcut)",
+                        "Metrik B": "Metrik B (mevcut)",
+                    }
+                )[
+                    [
+                        "Dönem",
+                        "Banka / kurum",
+                        "Metrik A (mevcut)",
+                        "Simüle Metrik A",
+                        "Metrik B (mevcut)",
+                        "Simüle Metrik B",
+                        "Mevcut",
+                        "Simülasyon",
+                        "Değişim (%)",
+                    ]
+                ]
                 st.dataframe(simulation_table, width="stretch", hide_index=True)
+                st.download_button(
+                    "Simülasyon verisini CSV indir",
+                    simulation_table.to_csv(index=False).encode("utf-8-sig"),
+                    file_name="tbb_metrik_simulasyonu.csv",
+                    mime="text/csv",
+                    key="simulation_table_download",
+                )
+
+        with simulation_quality_tab:
+            selected_periods = [
+                period
+                for period in simulation_periods
+                if simulation_start <= period <= simulation_end
+            ]
+            expected = pd.MultiIndex.from_product(
+                [selected_periods, multi_entities],
+                names=["period_end", "entity_name"],
+            )
+            missing_parts = []
+            for metric_label, metric_frame in (
+                ("Metrik A", scope_a),
+                ("Metrik B", scope_b),
+            ):
+                actual = pd.MultiIndex.from_frame(
+                    metric_frame[
+                        metric_frame["entity_name"].isin(multi_entities)
+                    ][["period_end", "entity_name"]].drop_duplicates()
+                )
+                missing = expected.difference(actual)
+                if len(missing):
+                    part = missing.to_frame(index=False)
+                    part["Eksik alan"] = metric_label
+                    missing_parts.append(part)
+            missing_count = sum(len(part) for part in missing_parts)
+            expected_count = len(expected) * 2
+            coverage = (
+                (expected_count - missing_count) / expected_count * 100
+                if expected_count
+                else 0
+            )
+            zero_denominators = all_scenarios[
+                all_scenarios["entity_name"].isin(multi_entities)
+                & (
+                    (all_scenarios["Metrik B"] == 0)
+                    | (all_scenarios["Simüle Metrik B"] == 0)
+                )
+            ][["period_end", "entity_name"]].drop_duplicates()
+            q1, q2, q3, q4 = st.columns(4)
+            q1.metric("Beklenen değer", number_tr(expected_count))
+            q2.metric("Mevcut değer", number_tr(expected_count - missing_count))
+            q3.metric("Kapsama oranı", f"%{number_tr(coverage, 1)}")
+            q4.metric("Sıfır payda", number_tr(len(zero_denominators)))
+            if missing_parts:
+                missing_table = pd.concat(missing_parts, ignore_index=True)
+                missing_table["Dönem"] = missing_table["period_end"].map(
+                    simulation_labels
+                )
+                missing_table = missing_table.rename(
+                    columns={"entity_name": "Banka / kurum"}
+                )[["Dönem", "Banka / kurum", "Eksik alan"]]
+                st.warning("Simülasyon kapsamında eksik metrik kayıtları var.")
+                st.dataframe(missing_table, width="stretch", hide_index=True)
+            elif len(zero_denominators):
+                st.warning("Eksik kayıt yok; ancak oranı engelleyen sıfır paydalar var.")
+            else:
+                st.success("Seçilen simülasyon kapsamında eksik kayıt yok.")
