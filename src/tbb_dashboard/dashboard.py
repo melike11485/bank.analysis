@@ -738,6 +738,70 @@ def make_time_figure(
     return figure
 
 
+def render_downloadable_chart(
+    figure,
+    export_data: pd.DataFrame,
+    key: str,
+    file_stem: str,
+) -> None:
+    """Render a chart with consistent PNG, CSV and interactive HTML exports."""
+    st.plotly_chart(
+        figure,
+        width="stretch",
+        key=key,
+        config={
+            "displaylogo": False,
+            "toImageButtonOptions": {
+                "format": "png",
+                "filename": file_stem,
+                "scale": 2,
+            },
+        },
+    )
+    st.caption(
+        "Grafiği PNG olarak indirmek için sağ üstteki kamera simgesini kullanın."
+    )
+    csv_col, html_col = st.columns(2)
+    csv_col.download_button(
+        "Grafik verisini CSV indir",
+        export_data.to_csv(index=False).encode("utf-8-sig"),
+        file_name=f"{file_stem}.csv",
+        mime="text/csv",
+        key=f"{key}_csv_download",
+    )
+    html_col.download_button(
+        "Etkileşimli grafiği HTML indir",
+        figure.to_html(full_html=True, include_plotlyjs="cdn"),
+        file_name=f"{file_stem}.html",
+        mime="text/html",
+        key=f"{key}_html_download",
+    )
+
+
+def standard_export_frame(
+    frame: pd.DataFrame,
+    value_columns: list[str] | None = None,
+) -> pd.DataFrame:
+    """Keep chart exports compact and use user-facing Turkish column names."""
+    value_columns = value_columns or ["value"]
+    columns = [
+        column
+        for column in ["period_label", "entity_name", *value_columns, "unit"]
+        if column in frame.columns
+    ]
+    return frame[columns].rename(
+        columns={
+            "period_label": "Dönem",
+            "entity_name": "Banka / kurum",
+            "value": "Değer",
+            "unit": "Birim",
+            "quarterly_change": "Çeyreklik değişim (%)",
+            "annual_change": "Yıllık değişim (%)",
+            "result": "Formül sonucu",
+        }
+    )
+
+
 st.set_page_config(
     page_title="TBB Banka Analizi",
     page_icon="🏦",
@@ -1024,10 +1088,11 @@ with period_tab:
                 plot_bgcolor="white",
                 paper_bgcolor="white",
             )
-            st.plotly_chart(
+            render_downloadable_chart(
                 systemic_figure,
-                width="stretch",
-                key="period_systemic_chart",
+                standard_export_frame(systemic_snapshot),
+                "period_systemic_chart",
+                "tbb_donemsel_sistemik_9_banka",
             )
         with single_chart_tab:
             if snapshot.empty:
@@ -1065,7 +1130,12 @@ with period_tab:
                     figure.update_xaxes(tickangle=-25)
                     figure.update_layout(coloraxis_showscale=False)
                 figure.update_layout(height=500, plot_bgcolor="white", paper_bgcolor="white")
-                st.plotly_chart(figure, width="stretch", key="period_single_chart")
+                render_downloadable_chart(
+                    figure,
+                    standard_export_frame(snapshot),
+                    "period_single_chart",
+                    "tbb_donemsel_secilen_bankalar",
+                )
         period_table = ranking_all[["Sıra", "entity_name", "value", "unit"]].rename(
             columns={"entity_name": "Banka / kurum", "value": "Değer", "unit": "Birim"}
         )
@@ -1191,10 +1261,11 @@ with time_tab:
             if systemic_figure is None:
                 st.info("Sistemik 9 banka için seçili kapsamda veri bulunamadı.")
             else:
-                st.plotly_chart(
+                render_downloadable_chart(
                     systemic_figure,
-                    width="stretch",
-                    key="time_systemic_chart",
+                    standard_export_frame(systemic_data),
+                    "time_systemic_chart",
+                    "tbb_zaman_sistemik_9_banka",
                 )
         with trend_tab:
             if comparison_data.empty:
@@ -1210,7 +1281,12 @@ with time_tab:
                     color_discrete_sequence=COLORS,
                 )
                 figure.update_layout(height=580)
-                st.plotly_chart(figure, width="stretch", key="time_trend_chart")
+                render_downloadable_chart(
+                    figure,
+                    standard_export_frame(comparison_data),
+                    "time_trend_chart",
+                    "tbb_zaman_donem_seyri",
+                )
             else:
                 figure = make_time_figure(
                     comparison_data,
@@ -1221,7 +1297,12 @@ with time_tab:
                     context["period_labels"],
                     end_date,
                 )
-                st.plotly_chart(figure, width="stretch", key="time_trend_chart")
+                render_downloadable_chart(
+                    figure,
+                    standard_export_frame(comparison_data),
+                    "time_trend_chart",
+                    "tbb_zaman_donem_seyri",
+                )
         for tab, column, label, empty_text in (
             (
                 quarterly_tab,
@@ -1249,10 +1330,11 @@ with time_tab:
                 if figure is None:
                     st.info(empty_text)
                 else:
-                    st.plotly_chart(
+                    render_downloadable_chart(
                         figure,
-                        width="stretch",
-                        key=f"time_{column}_chart",
+                        standard_export_frame(analysis_data, [column]),
+                        f"time_{column}_chart",
+                        f"tbb_zaman_{column}",
                     )
         comparison = endpoints.pivot_table(
             index="entity_name", columns="period_end", values="value", aggfunc="first"
@@ -1290,10 +1372,11 @@ with time_tab:
             if endpoint_figure is None:
                 st.info("Başlangıç–bitiş karşılaştırması için veri bulunamadı.")
             else:
-                st.plotly_chart(
+                render_downloadable_chart(
                     endpoint_figure,
-                    width="stretch",
-                    key="time_endpoint_chart",
+                    standard_export_frame(endpoints),
+                    "time_endpoint_chart",
+                    "tbb_zaman_baslangic_bitis",
                 )
             st.dataframe(
                 summary,
@@ -1302,6 +1385,13 @@ with time_tab:
                 column_config={
                     "Değişim (%)": st.column_config.NumberColumn(format="%.2f%%")
                 },
+            )
+            st.download_button(
+                "Başlangıç–bitiş tablosunu CSV indir",
+                summary.to_csv(index=False).encode("utf-8-sig"),
+                file_name="tbb_zaman_baslangic_bitis_ozeti.csv",
+                mime="text/csv",
+                key="time_endpoint_table_download",
             )
         detail = analysis_data[
             [
@@ -1557,10 +1647,14 @@ with calculator_tab:
                         st.warning(
                             f"Sıfır paydalı {zero_denominators} hesaplama boş bırakıldı."
                         )
-                    st.plotly_chart(
+                    render_downloadable_chart(
                         figure,
-                        width="stretch",
-                        key="calculator_result_chart",
+                        standard_export_frame(
+                            calculation,
+                            [*selected_metrics.keys(), "result"],
+                        ),
+                        "calculator_result_chart",
+                        "tbb_ozellestirilebilir_metrik_grafigi",
                     )
 
         calculator_columns = [
@@ -1893,7 +1987,36 @@ with simulation_tab:
                 paper_bgcolor="white",
                 legend_title_text="",
             )
-            st.plotly_chart(figure, width="stretch", key=key)
+            simulation_export = frame[
+                [
+                    "period_label",
+                    "entity_name",
+                    "Metrik A",
+                    "Simüle Metrik A",
+                    "Metrik B",
+                    "Simüle Metrik B",
+                    "Mevcut",
+                    "Simülasyon",
+                    "Değişim (%)",
+                ]
+            ].rename(
+                columns={
+                    "period_label": "Dönem",
+                    "entity_name": "Banka / kurum",
+                    "Metrik A": "Metrik A (mevcut)",
+                    "Metrik B": "Metrik B (mevcut)",
+                }
+            )
+            render_downloadable_chart(
+                figure,
+                simulation_export,
+                key,
+                (
+                    "tbb_metrik_simulasyonu_coklu_banka"
+                    if multiple
+                    else "tbb_metrik_simulasyonu_tek_banka"
+                ),
+            )
 
         single_tab, multi_tab, simulation_table_tab, simulation_quality_tab = st.tabs(
             ["Tek banka", "Birden fazla banka", "Veri tablosu", "Veri kalitesi"]
