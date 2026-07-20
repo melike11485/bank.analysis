@@ -1397,17 +1397,26 @@ with time_tab:
             (
                 annual_tab,
                 "annual_change",
-                "Yıllık değişim (%)",
-                "Yıllık değişim için dört önceki çeyrek gerekir.",
+                "Yıllık değişim (Aralık–Aralık, %)",
+                "Aralık–Aralık yıllık değişim için önceki yılın Aralık verisi gerekir.",
             ),
         ):
             with tab:
+                chart_frame = analysis_data
+                chart_periods = comparison_periods
+                if column == "annual_change":
+                    chart_frame = analysis_data[
+                        analysis_data["period_end"].dt.month == 12
+                    ].copy()
+                    chart_periods = [
+                        period for period in comparison_periods if period.month == 12
+                    ]
                 figure = make_time_figure(
-                    analysis_data,
+                    chart_frame,
                     column,
                     label,
                     chart_type,
-                    comparison_periods,
+                    chart_periods,
                     context["period_labels"],
                     end_date,
                 )
@@ -1416,7 +1425,7 @@ with time_tab:
                 else:
                     render_downloadable_chart(
                         figure,
-                        standard_export_frame(analysis_data, [column]),
+                        standard_export_frame(chart_frame, [column]),
                         f"time_{column}_chart_{chart_type}",
                         f"tbb_zaman_{column}",
                     )
