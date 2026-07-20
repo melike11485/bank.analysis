@@ -33,22 +33,26 @@ SOURCE_LABELS = {
 ENTITY_LABELS = {"bank": "Bankalar", "group": "Banka Grupları"}
 COLORS = [
     "#365F91",  # kurumsal mavi
-    "#6E5A8A",  # kül moru
-    "#984B6A",  # spicy pink / mürdüm
-    "#53698C",  # arduvaz mavisi
-    "#A2385A",  # bordo
-    "#7A4E7A",  # mat erik moru
-    "#8B596F",  # gül kurusu mürdüm
-    "#59649B",  # gri indigo
-    "#755F8F",  # dumanlı mor
+    "#9AADC2",  # açık arduvaz mavisi
+    "#8F3F60",  # mat mürdüm
+    "#B88FA0",  # açık gül kurusu
+    "#625276",  # koyu kül moru
+    "#9A8DA8",  # açık kül moru
+    "#4E6685",  # arduvaz mavisi
+    "#8393AA",  # sisli mavi
+    "#7C465F",  # şarap mürdümü
+    "#AA7F92",  # mat pembe mürdüm
+    "#5F557F",  # dumanlı indigo
+    "#9187A1",  # gri lavanta
 ]
 CONTINUOUS_COLORS = [
     "#365F91",
-    "#53698C",
-    "#6E5A8A",
-    "#7A4E7A",
+    "#7186A2",
+    "#9AADC2",
+    "#9A8DA8",
+    "#806B90",
     "#984B6A",
-    "#A2385A",
+    "#8F3F60",
 ]
 SOURCE_AVAILABILITY_NOTES = {
     ("pasifler", "ser_benz", "summary_available"): (
