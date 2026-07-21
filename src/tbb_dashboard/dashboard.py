@@ -467,10 +467,11 @@ def render_chart_selector(
 ) -> str:
     options = ["Çizgi", "Sütun", "Daire"]
     widget_key = f"{namespace}_chart_type"
+    if st.session_state.get(widget_key) not in options:
+        st.session_state[widget_key] = default
     return st.radio(
         label,
         options,
-        index=options.index(default),
         horizontal=True,
         key=widget_key,
     )
@@ -1217,7 +1218,7 @@ with period_tab:
             render_downloadable_chart(
                 systemic_figure,
                 standard_export_frame(systemic_snapshot),
-                f"period_systemic_chart_{chart_type}",
+                "period_systemic_chart",
                 "tbb_donemsel_sistemik_9_banka",
             )
         with single_chart_tab:
@@ -1272,7 +1273,7 @@ with period_tab:
                 render_downloadable_chart(
                     figure,
                     standard_export_frame(snapshot),
-                    f"period_single_chart_{chart_type}",
+                    "period_single_chart",
                     "tbb_donemsel_secilen_bankalar",
                 )
         period_table = ranking_all[["Sıra", "entity_name", "value", "unit"]].rename(
@@ -1403,7 +1404,7 @@ with time_tab:
                 render_downloadable_chart(
                     systemic_figure,
                     standard_export_frame(systemic_data),
-                    f"time_systemic_chart_{chart_type}",
+                    "time_systemic_chart",
                     "tbb_zaman_sistemik_9_banka",
                 )
         with trend_tab:
@@ -1426,7 +1427,7 @@ with time_tab:
                 render_downloadable_chart(
                     figure,
                     standard_export_frame(comparison_data),
-                    f"time_trend_chart_{chart_type}",
+                    "time_trend_chart",
                     "tbb_zaman_donem_seyri",
                 )
             else:
@@ -1442,7 +1443,7 @@ with time_tab:
                 render_downloadable_chart(
                     figure,
                     standard_export_frame(comparison_data),
-                    f"time_trend_chart_{chart_type}",
+                    "time_trend_chart",
                     "tbb_zaman_donem_seyri",
                 )
         for (
@@ -1576,7 +1577,7 @@ with time_tab:
                 render_downloadable_chart(
                     endpoint_figure,
                     standard_export_frame(endpoints),
-                    f"time_endpoint_chart_{chart_type}",
+                    "time_endpoint_chart",
                     "tbb_zaman_baslangic_bitis",
                 )
             st.dataframe(display_table(summary), width="stretch", hide_index=True)
@@ -1839,7 +1840,7 @@ with calculator_tab:
                             calculation,
                             [*selected_metrics.keys(), "result"],
                         ),
-                        f"calculator_result_chart_{chart_type}",
+                        "calculator_result_chart",
                         "tbb_ozellestirilebilir_metrik_grafigi",
                     )
 
