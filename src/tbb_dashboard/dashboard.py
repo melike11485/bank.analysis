@@ -164,42 +164,45 @@ def display_table(frame: pd.DataFrame) -> pd.DataFrame:
     return formatted
 
 
-def apply_chart_number_format(figure) -> None:
+def apply_chart_number_format(figure, decimals: int = 0) -> None:
     """Show rounded Turkish-formatted values directly on every chart."""
     figure.update_layout(separators=",.")
+    x_value = f"%{{x:,.{decimals}f}}"
+    y_value = f"%{{y:,.{decimals}f}}"
+    pie_value = f"%{{value:,.{decimals}f}}"
     for trace in figure.data:
         if trace.type == "scatter":
             trace.update(
-                texttemplate="%{y:,.0f}",
+                texttemplate=y_value,
                 textposition="top center",
                 hovertemplate=(
-                    "%{fullData.name}<br>%{x}<br>%{y:,.0f}<extra></extra>"
+                    f"%{{fullData.name}}<br>%{{x}}<br>{y_value}<extra></extra>"
                 ),
             )
         elif trace.type == "bar":
             horizontal = getattr(trace, "orientation", None) == "h"
             trace.update(
-                texttemplate="%{x:,.0f}" if horizontal else "%{y:,.0f}",
+                texttemplate=x_value if horizontal else y_value,
                 textposition="outside",
                 cliponaxis=False,
                 hovertemplate=(
-                    "%{fullData.name}<br>%{y}<br>%{x:,.0f}<extra></extra>"
+                    f"%{{fullData.name}}<br>%{{y}}<br>{x_value}<extra></extra>"
                     if horizontal
-                    else "%{fullData.name}<br>%{x}<br>%{y:,.0f}<extra></extra>"
+                    else f"%{{fullData.name}}<br>%{{x}}<br>{y_value}<extra></extra>"
                 ),
             )
         elif trace.type == "pie":
             trace.update(
-                texttemplate="%{value:,.0f}<br>%{percent:.0%}",
+                texttemplate=f"{pie_value}<br>%{{percent:.0%}}",
                 textposition="inside",
                 hovertemplate=(
-                    "%{label}<br>%{value:,.0f}<br>%{percent:.0%}<extra></extra>"
+                    f"%{{label}}<br>{pie_value}<br>%{{percent:.0%}}<extra></extra>"
                 ),
             )
         elif trace.type == "sunburst":
             trace.update(
-                texttemplate="%{label}<br>%{value:,.0f}",
-                hovertemplate="%{label}<br>%{value:,.0f}<extra></extra>",
+                texttemplate=f"%{{label}}<br>{pie_value}",
+                hovertemplate=f"%{{label}}<br>{pie_value}<extra></extra>",
             )
 
 
@@ -843,9 +846,10 @@ def render_downloadable_chart(
     export_data: pd.DataFrame,
     key: str,
     file_stem: str,
+    value_decimals: int = 0,
 ) -> None:
     """Render a chart with consistent PNG, CSV and interactive HTML exports."""
-    apply_chart_number_format(figure)
+    apply_chart_number_format(figure, decimals=value_decimals)
     st.plotly_chart(
         figure,
         width="stretch",
@@ -2224,6 +2228,7 @@ with simulation_tab:
                     if multiple
                     else "tbb_metrik_simulasyonu_tek_banka"
                 ),
+                value_decimals=2,
             )
 
         single_tab, multi_tab, simulation_table_tab, simulation_quality_tab = st.tabs(
@@ -2250,25 +2255,24 @@ with simulation_tab:
                     "bulunmuyor veya payda sıfır."
                 )
             else:
-                last_row = single_scenario.iloc[-1]
-                r1, r2, r3, r4 = st.columns(4)
-                r1.metric("Bitiş dönemi", last_row["period_label"])
-                r2.metric(
+                last_row = single_scenario.sort_values("period_end").iloc[-1]
+                r1, r2, r3 = st.columns(3)
+                r1.metric(
                     f"{simulation_metric_a_name} (simüle)",
                     number_tr(last_row["Simüle Metrik A"]),
                 )
-                r3.metric(
+                r2.metric(
                     f"{simulation_metric_b_name} (simüle)",
                     number_tr(last_row["Simüle Metrik B"]),
                 )
-                r4.metric(
+                r3.metric(
                     "Simüle oran",
                     (
-                        f"%{number_tr(last_row['Simülasyon'])}"
+                        f"%{number_tr(last_row['Simülasyon'], 2)}"
                         if multiplier == 100
-                        else number_tr(last_row["Simülasyon"])
+                        else number_tr(last_row["Simülasyon"], 2)
                     ),
-                    delta=f"%{number_tr(last_row['Değişim (%)'])}",
+                    delta=f"%{number_tr(last_row['Değişim (%)'], 2)}",
                 )
                 simulation_chart(
                     single_scenario,
