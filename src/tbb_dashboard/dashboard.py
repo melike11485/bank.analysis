@@ -2033,7 +2033,8 @@ with simulation_tab:
         operation_col, chart_col = st.columns([2, 1])
         operation = operation_col.radio(
             "Hesaplama",
-            ["Oran (A / B)", "Yüzde oran ((A / B) × 100)"],
+            ["Yüzde oran ((A / B) × 100)", "Oran (A / B)"],
+            index=0,
             horizontal=True,
             key="simulation_operation",
         )
