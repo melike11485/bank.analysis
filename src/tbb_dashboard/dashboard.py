@@ -46,6 +46,10 @@ COLORS = [
     "#8EAAC2",  # açık çelik mavisi
     "#254D73",  # okyanus mavisi
 ]
+SIMULATION_COLORS = [
+    "#24496E",  # mevcut: koyu lacivert
+    "#97506D",  # simülasyon: mat mürdüm
+]
 CONTINUOUS_COLORS = [
     "#D8E8F2",
     "#A9C4E0",
@@ -2158,7 +2162,7 @@ with simulation_tab:
                         text="Sonuç etiketi",
                         color="Senaryo",
                         markers=True,
-                        color_discrete_sequence=[COLORS[0], COLORS[3]],
+                        color_discrete_sequence=SIMULATION_COLORS,
                         labels={"period_label": "Dönem", "Sonuç": operation},
                     )
             elif multiple:
@@ -2185,7 +2189,7 @@ with simulation_tab:
                     text="Sonuç etiketi",
                     color="Senaryo",
                     barmode="group",
-                    color_discrete_sequence=[COLORS[0], COLORS[3]],
+                    color_discrete_sequence=SIMULATION_COLORS,
                     labels={"period_label": "Dönem", "Sonuç": operation},
                 )
             figure.update_layout(
@@ -2266,11 +2270,11 @@ with simulation_tab:
                 last_row = single_scenario.sort_values("period_end").iloc[-1]
                 r1, r2, r3 = st.columns(3)
                 r1.metric(
-                    f"{simulation_metric_a_name} (simüle)",
+                    simulation_metric_a_name,
                     number_tr(last_row["Simüle Metrik A"]),
                 )
                 r2.metric(
-                    f"{simulation_metric_b_name} (simüle)",
+                    simulation_metric_b_name,
                     number_tr(last_row["Simüle Metrik B"]),
                 )
                 r3.metric(
