@@ -267,15 +267,19 @@ def evaluate_formula(
 def reset_filter_dependents(namespace: str) -> None:
     st.session_state[f"{namespace}_sheet"] = None
     st.session_state[f"{namespace}_metric"] = None
+    reset_chart(namespace)
 
 
 def reset_metric(namespace: str) -> None:
     st.session_state[f"{namespace}_metric"] = None
-    st.session_state.pop(f"{namespace}_chart_type", None)
+    reset_chart(namespace)
 
 
 def reset_chart(namespace: str) -> None:
-    st.session_state.pop(f"{namespace}_chart_type", None)
+    prefix = f"{namespace}_chart_type"
+    for key in tuple(st.session_state):
+        if key == prefix or key.startswith(f"{prefix}_"):
+            st.session_state.pop(key, None)
 
 
 def reset_simulation_scope() -> None:
@@ -459,14 +463,10 @@ def render_metric_filters(
 def render_chart_selector(
     namespace: str,
     default: str = "Sütun",
-    state_token: str | None = None,
     label: str = "Grafik türü",
 ) -> str:
     options = ["Çizgi", "Sütun", "Daire"]
     widget_key = f"{namespace}_chart_type"
-    if state_token:
-        token = hashlib.sha1(state_token.encode("utf-8")).hexdigest()[:12]
-        widget_key = f"{widget_key}_{token}"
     return st.radio(
         label,
         options,
@@ -1152,7 +1152,6 @@ with period_tab:
                     if context["metric_key"] == CAPITAL_ADEQUACY_METRIC
                     else "Sütun"
                 ),
-                state_token=context["metric_key"],
             )
         data = context["data"]
         unit = context["unit"]
@@ -1349,7 +1348,6 @@ with time_tab:
                     if context["metric_key"] == CAPITAL_ADEQUACY_METRIC
                     else "Sütun"
                 ),
-                state_token=context["metric_key"],
             )
         data = context["data"]
         comparison_periods = [item for item in dates if start_date <= item <= end_date]
@@ -1490,7 +1488,6 @@ with time_tab:
                     value_chart_type = render_chart_selector(
                         f"time_{period_name.lower()}_value",
                         default="Sütun",
-                        state_token=context["metric_key"],
                         label="Değer grafiği",
                     )
                 value_figure = make_time_figure(
@@ -1520,7 +1517,6 @@ with time_tab:
                     change_chart_type = render_chart_selector(
                         f"time_{period_name.lower()}_change",
                         default="Çizgi",
-                        state_token=context["metric_key"],
                         label="Değişim grafiği",
                     )
                 change_figure = make_time_figure(
