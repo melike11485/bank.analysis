@@ -2130,12 +2130,16 @@ with simulation_tab:
                 var_name="Senaryo",
                 value_name="Sonuç",
             )
+            chart_data["Sonuç etiketi"] = chart_data["Sonuç"].map(
+                lambda value: "" if pd.isna(value) else number_tr(value, 4)
+            )
             if simulation_chart_type == "Çizgi":
                 if multiple:
                     figure = px.line(
                         chart_data,
                         x="period_label",
                         y="Sonuç",
+                        text="Sonuç etiketi",
                         color="entity_name",
                         line_dash="Senaryo",
                         markers=True,
@@ -2151,6 +2155,7 @@ with simulation_tab:
                         chart_data,
                         x="period_label",
                         y="Sonuç",
+                        text="Sonuç etiketi",
                         color="Senaryo",
                         markers=True,
                         color_discrete_sequence=[COLORS[0], COLORS[3]],
@@ -2161,6 +2166,7 @@ with simulation_tab:
                     chart_data,
                     x="period_label",
                     y="Sonuç",
+                    text="Sonuç etiketi",
                     color="entity_name",
                     pattern_shape="Senaryo",
                     barmode="group",
@@ -2176,6 +2182,7 @@ with simulation_tab:
                     chart_data,
                     x="period_label",
                     y="Sonuç",
+                    text="Sonuç etiketi",
                     color="Senaryo",
                     barmode="group",
                     color_discrete_sequence=[COLORS[0], COLORS[3]],
@@ -2189,12 +2196,12 @@ with simulation_tab:
             )
             if simulation_chart_type == "Çizgi":
                 figure.update_traces(
-                    texttemplate="%{y:,.2f}",
+                    texttemplate="%{text}",
                     textposition="top center",
                 )
             else:
                 figure.update_traces(
-                    texttemplate="%{y:,.2f}",
+                    texttemplate="%{text}",
                     textposition="outside",
                     cliponaxis=False,
                 )
@@ -2229,7 +2236,7 @@ with simulation_tab:
                     if multiple
                     else "tbb_metrik_simulasyonu_tek_banka"
                 ),
-                value_decimals=2,
+                value_decimals=4,
             )
 
         single_tab, multi_tab, simulation_table_tab, simulation_quality_tab = st.tabs(
@@ -2269,11 +2276,11 @@ with simulation_tab:
                 r3.metric(
                     "Simüle oran",
                     (
-                        f"%{number_tr(last_row['Simülasyon'], 2)}"
+                        f"%{number_tr(last_row['Simülasyon'], 4)}"
                         if multiplier == 100
-                        else number_tr(last_row["Simülasyon"], 2)
+                        else number_tr(last_row["Simülasyon"], 4)
                     ),
-                    delta=f"%{number_tr(last_row['Değişim (%)'], 2)}",
+                    delta=f"%{number_tr(last_row['Değişim (%)'], 4)}",
                 )
                 simulation_chart(
                     single_scenario,
@@ -2330,8 +2337,13 @@ with simulation_tab:
                         "Değişim (%)",
                     ]
                 ]
+                simulation_table_display = display_table(simulation_table)
+                for column in ("Mevcut", "Simülasyon", "Değişim (%)"):
+                    simulation_table_display[column] = simulation_table[column].map(
+                        lambda value: "" if pd.isna(value) else number_tr(value, 4)
+                    )
                 st.dataframe(
-                    display_table(simulation_table), width="stretch", hide_index=True
+                    simulation_table_display, width="stretch", hide_index=True
                 )
                 st.download_button(
                     "Simülasyon verisini CSV indir",
