@@ -1077,9 +1077,12 @@ title_col, refresh_col = st.columns([7, 1], vertical_alignment="center")
 with title_col:
     st.title("TBB Banka Analiz Paneli")
 with refresh_col:
-    if st.button("Veritabanını yenile", use_container_width=True):
-        st.cache_data.clear()
-        st.rerun()
+    st.button(
+        "Veritabanını yenile",
+        use_container_width=True,
+        on_click=st.cache_data.clear,
+        help="Veritabanından okunan güncel verileri ve filtre kataloğunu yeniden yükler.",
+    )
 st.markdown(
     '<div class="subtle">Türkiye Bankalar Birliği solo banka verileri • '
     "Mart 2020’den itibaren çeyreklik analiz</div>",
