@@ -45,6 +45,21 @@ COLORS = [
     "#44527C",  # mor-lacivert
     "#8EAAC2",  # açık çelik mavisi
     "#254D73",  # okyanus mavisi
+    "#3F6FA5",  # arduvaz mavisi
+    "#5B8DB8",  # yumuşak mavi
+    "#88AFCB",  # buz mavisi
+    "#356E7D",  # koyu petrol mavisi
+    "#4E7D8F",  # dumanlı turkuaz
+    "#6B9EAA",  # açık petrol mavisi
+    "#315C8C",  # kraliyet mavisi
+    "#5670A6",  # mat indigo
+    "#7F91B8",  # lavanta mavisi
+    "#2F7F86",  # derin turkuaz
+    "#6595C2",  # göl mavisi
+    "#9AB6CC",  # soluk mavi
+    "#344F70",  # gece mavisi
+    "#527E9D",  # koyu gök mavisi
+    "#79A6BE",  # puslu camgöbeği
 ]
 SIMULATION_COLORS = COLORS[:2]
 SOURCE_AVAILABILITY_NOTES = {
@@ -111,10 +126,27 @@ def entity_color_map(entities) -> dict[str, str]:
         for index, aliases in enumerate(SYSTEMIC_BANK_COLOR_GROUPS)
         for alias in aliases
     }
-    for name in dict.fromkeys(str(entity) for entity in entities if pd.notna(entity)):
-        if name not in colors:
-            digest = hashlib.sha1(name.encode("utf-8")).hexdigest()
-            colors[name] = COLORS[int(digest, 16) % len(COLORS)]
+    available_colors = COLORS[len(SYSTEMIC_BANK_COLOR_GROUPS) :]
+    used_colors = set(colors.values())
+    names = sorted(
+        dict.fromkeys(str(entity) for entity in entities if pd.notna(entity))
+    )
+    for name in names:
+        if name in colors:
+            continue
+        digest = hashlib.sha1(name.encode("utf-8")).hexdigest()
+        start = int(digest, 16) % len(available_colors)
+        color = next(
+            (
+                available_colors[(start + offset) % len(available_colors)]
+                for offset in range(len(available_colors))
+                if available_colors[(start + offset) % len(available_colors)]
+                not in used_colors
+            ),
+            available_colors[start],
+        )
+        colors[name] = color
+        used_colors.add(color)
     return colors
 
 
