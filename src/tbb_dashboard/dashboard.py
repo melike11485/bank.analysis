@@ -336,6 +336,19 @@ def sync_entity_filter(
     st.session_state[selection_key] = list(selected)
 
 
+def activate_entity_selection_view(namespace: str) -> None:
+    view_targets = {
+        "period": ("period_view", "Seçilebilir bankalar"),
+        "time": ("time_view", "Dönem seyri"),
+        "calculator": ("calculator_view", "Grafik"),
+        "simulation_multi": ("simulation_view", "Birden fazla banka"),
+    }
+    target = view_targets.get(namespace)
+    if target:
+        key, value = target
+        st.session_state[key] = value
+
+
 def render_metric_filters(
     namespace: str,
     catalog: pd.DataFrame,
@@ -614,6 +627,7 @@ def render_entity_filter(
                 st.session_state[checkbox_key(entity_name)] = (
                     entity_name in selected_for_preset
                 )
+            activate_entity_selection_view(namespace)
             st.rerun()
         action_a, action_b = st.columns(2)
         primary_label = f"İlk {exact_count}'yi seç" if exact_count else "Tümünü seç"
@@ -639,6 +653,7 @@ def render_entity_filter(
                 st.session_state[checkbox_key(entity_name)] = (
                     entity_name in selected_for_action
                 )
+            activate_entity_selection_view(namespace)
             st.rerun()
         if sort_choice == "A–Z":
             displayed = sorted(all_entities)
