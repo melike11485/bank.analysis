@@ -46,10 +46,8 @@ COLORS = [
     "#8EAAC2",  # açık çelik mavisi
     "#254D73",  # okyanus mavisi
 ]
-SIMULATION_COLORS = [
-    "#24496E",  # mevcut: koyu lacivert
-    "#2A8F98",  # simülasyon: mat turkuaz
-]
+SIMULATION_COLORS = COLORS[:2]
+SIMULATION_ENTITY_COLORS = COLORS
 CONTINUOUS_COLORS = [
     "#D8E8F2",
     "#A9C4E0",
@@ -111,7 +109,7 @@ def query(sql: str, params: tuple = ()) -> pd.DataFrame:
         return pd.read_sql_query(sql, connection, params=params)
 
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, ttl=3600, max_entries=4)
 def load_catalog() -> pd.DataFrame:
     return query(
         """
@@ -125,9 +123,9 @@ def load_catalog() -> pd.DataFrame:
     )
 
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, ttl=3600, max_entries=64)
 def load_series(metric_key: str, entity_type: str) -> pd.DataFrame:
-    return query(
+    frame = query(
         """
         SELECT period_end, period_label, entity_name, value, unit
         FROM observations
@@ -136,9 +134,14 @@ def load_series(metric_key: str, entity_type: str) -> pd.DataFrame:
         """,
         (metric_key, entity_type),
     )
+    if not frame.empty:
+        frame["period_end"] = pd.to_datetime(frame["period_end"])
+        for column in ("period_label", "entity_name", "unit"):
+            frame[column] = frame[column].astype("category")
+    return frame
 
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, ttl=3600, max_entries=32)
 def load_schema_availability(source_group: str, sheet_key: str) -> pd.DataFrame:
     return query(
         """
@@ -462,7 +465,6 @@ def render_metric_filters(
     if data.empty:
         st.warning("Bu filtreler için gösterilecek veri bulunamadı.")
         return None
-    data["period_end"] = pd.to_datetime(data["period_end"])
     periods = data[["period_end", "period_label"]].drop_duplicates().sort_values(
         "period_end"
     )
@@ -508,7 +510,7 @@ def render_entity_filter(
     period: pd.Timestamp,
     default_count: int = 5,
     exact_count: int | None = None,
-    default_selection: str = "all",
+    default_selection: str = "top",
 ) -> list[str]:
     data = context["data"]
     all_entities = context["all_entities"]
@@ -570,7 +572,6 @@ def render_entity_filter(
         )
         size_data = load_series(GENERAL_SIZE_METRIC, entity_type)
         if not size_data.empty:
-            size_data["period_end"] = pd.to_datetime(size_data["period_end"])
             size_snapshot = size_data[size_data["period_end"] == period]
             if size_snapshot.empty:
                 earlier = size_data[size_data["period_end"] <= period]
@@ -874,7 +875,7 @@ def render_downloadable_chart(
     apply_chart_number_format(figure, decimals=value_decimals)
     st.plotly_chart(
         figure,
-        width="stretch",
+        use_container_width=True,
         key=key,
         config={
             "displaylogo": False,
@@ -888,21 +889,25 @@ def render_downloadable_chart(
     st.caption(
         "Grafiği PNG olarak indirmek için sağ üstteki kamera simgesini kullanın."
     )
-    csv_col, html_col = st.columns(2)
-    csv_col.download_button(
+    st.download_button(
         "Grafik verisini CSV indir",
         export_data.to_csv(index=False).encode("utf-8-sig"),
         file_name=f"{file_stem}.csv",
         mime="text/csv",
         key=f"{key}_csv_download",
     )
-    html_col.download_button(
-        "Etkileşimli grafiği HTML indir",
-        figure.to_html(full_html=True, include_plotlyjs="cdn"),
-        file_name=f"{file_stem}.html",
-        mime="text/html",
-        key=f"{key}_html_download",
-    )
+    if st.checkbox(
+        "Etkileşimli HTML indirme bağlantısını hazırla",
+        key=f"{key}_prepare_html",
+        help="Büyük Plotly HTML çıktısı belleği artırdığı için yalnızca gerektiğinde hazırlanır.",
+    ):
+        st.download_button(
+            "Etkileşimli grafiği HTML indir",
+            figure.to_html(full_html=True, include_plotlyjs="cdn"),
+            file_name=f"{file_stem}.html",
+            mime="text/html",
+            key=f"{key}_html_download",
+        )
 
 
 def standard_export_frame(
@@ -1141,17 +1146,20 @@ calculator_catalog = calculator_catalog.sort_values("display_name")
 calculator_options = calculator_catalog["metric_key"].tolist()
 calculator_lookup = calculator_catalog.set_index("metric_key")["display_name"].to_dict()
 
-period_tab, time_tab, calculator_tab, simulation_tab = st.tabs(
+main_view = st.radio(
+    "Analiz türü",
     [
         "Dönemsel analiz",
         "Zaman analizi",
         "Özelleştirilebilir metrikler",
         "Metrik simülasyonu",
-    ]
+    ],
+    horizontal=True,
+    key="main_view",
 )
 
 
-with period_tab:
+if main_view == "Dönemsel analiz":
     st.subheader("Dönemsel analiz")
     context = render_metric_filters("period", catalog)
     if context:
@@ -1169,7 +1177,7 @@ with period_tab:
                 context,
                 "period",
                 analysis_date,
-                default_selection="all",
+                default_selection="top",
             )
         with chart_col:
             chart_type = render_chart_selector(
@@ -1189,10 +1197,13 @@ with period_tab:
             "value", ascending=False
         ).copy()
         ranking_all["Sıra"] = range(1, len(ranking_all) + 1)
-        systemic_tab, single_chart_tab, table_tab, quality_tab = st.tabs(
-            ["Sistemik 9 banka", "Seçilebilir bankalar", "Veri tablosu", "Veri kalitesi"]
+        period_view = st.radio(
+            "Dönemsel görünüm",
+            ["Sistemik 9 banka", "Seçilebilir bankalar", "Veri tablosu", "Veri kalitesi"],
+            horizontal=True,
+            key="period_view",
         )
-        with systemic_tab:
+        if period_view == "Sistemik 9 banka":
             systemic_names = systemic_entities(
                 ranking_all["entity_name"].dropna().unique().tolist()
             )
@@ -1247,7 +1258,7 @@ with period_tab:
                 "period_systemic_chart",
                 "tbb_donemsel_sistemik_9_banka",
             )
-        with single_chart_tab:
+        elif period_view == "Seçilebilir bankalar":
             if snapshot.empty:
                 st.info("Grafik için en az bir banka veya kurum seçin.")
             else:
@@ -1305,7 +1316,7 @@ with period_tab:
         period_table = ranking_all[["Sıra", "entity_name", "value", "unit"]].rename(
             columns={"entity_name": "Banka / kurum", "value": "Değer", "unit": "Birim"}
         )
-        with table_tab:
+        if period_view == "Veri tablosu":
             st.dataframe(display_table(period_table), width="stretch", hide_index=True)
             st.download_button(
                 "Dönemsel analiz verisini CSV indir",
@@ -1313,7 +1324,7 @@ with period_tab:
                 file_name="tbb_donemsel_analiz.csv",
                 mime="text/csv",
             )
-        with quality_tab:
+        elif period_view == "Veri kalitesi":
             render_quality(
                 ranking_all,
                 [analysis_date],
@@ -1325,7 +1336,7 @@ with period_tab:
             render_source_availability_notes(context)
 
 
-with time_tab:
+elif main_view == "Zaman analizi":
     st.subheader("Zaman analizi")
     context = render_metric_filters("time", catalog)
     if context:
@@ -1398,7 +1409,8 @@ with time_tab:
         endpoints = comparison_data[
             comparison_data["period_end"].isin([start_date, end_date])
         ].copy()
-        systemic_tab, trend_tab, endpoint_tab, quarterly_tab, annual_tab, table_tab, quality_tab = st.tabs(
+        time_view = st.radio(
+            "Zaman görünümü",
             [
                 "Sistemik 9 banka",
                 "Dönem seyri",
@@ -1407,9 +1419,11 @@ with time_tab:
                 "Yıllık",
                 "Veri tablosu",
                 "Veri kalitesi",
-            ]
+            ],
+            horizontal=True,
+            key="time_view",
         )
-        with systemic_tab:
+        if time_view == "Sistemik 9 banka":
             systemic_names = systemic_entities(context["all_entities"])
             systemic_data = data[
                 data["entity_name"].isin(systemic_names)
@@ -1433,7 +1447,7 @@ with time_tab:
                     "time_systemic_chart",
                     "tbb_zaman_sistemik_9_banka",
                 )
-        with trend_tab:
+        elif time_view == "Dönem seyri":
             if comparison_data.empty:
                 st.info("Grafik için en az bir banka veya kurum seçin.")
             elif chart_type == "Daire":
@@ -1472,98 +1486,90 @@ with time_tab:
                     "time_trend_chart",
                     "tbb_zaman_donem_seyri",
                 )
-        for (
-            tab,
-            period_name,
-            change_column,
-            change_label,
-            empty_text,
-            annual_only,
-        ) in (
-            (
-                quarterly_tab,
-                "Çeyreklik",
-                "quarterly_change",
-                "Çeyreklik değişim (%)",
-                "Çeyreklik değişim hesaplanamadı.",
-                False,
-            ),
-            (
-                annual_tab,
-                "Yıllık",
-                "annual_change",
-                "Yıllık değişim (Aralık–Aralık, %)",
-                "Aralık–Aralık yıllık değişim için önceki yılın Aralık verisi gerekir.",
-                True,
-            ),
-        ):
-            with tab:
-                chart_frame = analysis_data.copy()
-                chart_periods = comparison_periods.copy()
-                if annual_only:
-                    chart_frame = analysis_data[
-                        analysis_data["period_end"].dt.month == 12
-                    ].copy()
-                    chart_periods = [
-                        period for period in comparison_periods if period.month == 12
-                    ]
+        if time_view in {"Çeyreklik", "Yıllık"}:
+            change_view_config = {
+                "Çeyreklik": (
+                    "Çeyreklik",
+                    "quarterly_change",
+                    "Çeyreklik değişim (%)",
+                    "Çeyreklik değişim hesaplanamadı.",
+                    False,
+                ),
+                "Yıllık": (
+                    "Yıllık",
+                    "annual_change",
+                    "Yıllık değişim (Aralık–Aralık, %)",
+                    "Aralık–Aralık yıllık değişim için önceki yılın Aralık verisi gerekir.",
+                    True,
+                ),
+            }
+            period_name, change_column, change_label, empty_text, annual_only = change_view_config[time_view]
+            chart_frame = analysis_data.copy()
+            chart_periods = comparison_periods.copy()
+            if annual_only:
+                chart_frame = analysis_data[
+                    analysis_data["period_end"].dt.month == 12
+                ].copy()
+                chart_periods = [
+                    period for period in comparison_periods if period.month == 12
+                ]
 
-                value_title_col, value_selector_col = st.columns([3, 2])
-                with value_title_col:
-                    st.subheader(f"{period_name} değer")
-                with value_selector_col:
-                    value_chart_type = render_chart_selector(
-                        f"time_{period_name.lower()}_value",
-                        default="Sütun",
-                        label="Değer grafiği",
-                    )
-                value_figure = make_time_figure(
-                    chart_frame,
-                    "value",
-                    context["unit"],
-                    value_chart_type,
-                    chart_periods,
-                    context["period_labels"],
-                    end_date,
+            value_title_col, value_selector_col = st.columns([3, 2])
+            with value_title_col:
+                st.subheader(f"{period_name} değer")
+            with value_selector_col:
+                value_chart_type = render_chart_selector(
+                    f"time_{period_name.lower()}_value",
+                    default="Sütun",
+                    label="Değer grafiği",
                 )
-                if value_figure is None:
-                    st.info(f"{period_name} değer grafiği için veri bulunamadı.")
-                else:
-                    render_downloadable_chart(
-                        value_figure,
-                        standard_export_frame(chart_frame),
-                        f"time_{period_name.lower()}_value_chart_{value_chart_type}",
-                        f"tbb_zaman_{period_name.lower()}_deger",
-                    )
+            value_figure = make_time_figure(
+                chart_frame,
+                "value",
+                context["unit"],
+                value_chart_type,
+                chart_periods,
+                context["period_labels"],
+                end_date,
+            )
+            if value_figure is None:
+                st.info(f"{period_name} değer grafiği için veri bulunamadı.")
+            else:
+                render_downloadable_chart(
+                    value_figure,
+                    standard_export_frame(chart_frame),
+                    f"time_{period_name.lower()}_value_chart_{value_chart_type}",
+                    f"tbb_zaman_{period_name.lower()}_deger",
+                )
 
-                st.divider()
-                change_title_col, change_selector_col = st.columns([3, 2])
-                with change_title_col:
-                    st.subheader(f"{period_name} değişim")
-                with change_selector_col:
-                    change_chart_type = render_chart_selector(
-                        f"time_{period_name.lower()}_change",
-                        default="Çizgi",
-                        label="Değişim grafiği",
-                    )
-                change_figure = make_time_figure(
-                    chart_frame,
-                    change_column,
-                    change_label,
-                    change_chart_type,
-                    chart_periods,
-                    context["period_labels"],
-                    end_date,
+            st.divider()
+            change_title_col, change_selector_col = st.columns([3, 2])
+            with change_title_col:
+                st.subheader(f"{period_name} değişim")
+            with change_selector_col:
+                change_chart_type = render_chart_selector(
+                    f"time_{period_name.lower()}_change",
+                    default="Çizgi",
+                    label="Değişim grafiği",
                 )
-                if change_figure is None:
-                    st.info(empty_text)
-                else:
-                    render_downloadable_chart(
-                        change_figure,
-                        standard_export_frame(chart_frame, [change_column]),
-                        f"time_{change_column}_chart_{change_chart_type}",
-                        f"tbb_zaman_{change_column}",
-                    )
+            change_figure = make_time_figure(
+                chart_frame,
+                change_column,
+                change_label,
+                change_chart_type,
+                chart_periods,
+                context["period_labels"],
+                end_date,
+            )
+            if change_figure is None:
+                st.info(empty_text)
+            else:
+                render_downloadable_chart(
+                    change_figure,
+                    standard_export_frame(chart_frame, [change_column]),
+                    f"time_{change_column}_chart_{change_chart_type}",
+                    f"tbb_zaman_{change_column}",
+                )
         comparison = endpoints.pivot_table(
             index="entity_name", columns="period_end", values="value", aggfunc="first"
         ).reindex(entities)
@@ -1587,7 +1593,7 @@ with time_tab:
             .sub(1)
             .mul(100)
         )
-        with endpoint_tab:
+        if time_view == "Başlangıç–bitiş":
             endpoint_figure = make_time_figure(
                 endpoints,
                 "value",
@@ -1633,7 +1639,7 @@ with time_tab:
                 "unit": "Birim",
             }
         )
-        with table_tab:
+        if time_view == "Veri tablosu":
             st.markdown("**Ara dönemler dahil tüm kayıtlar**")
             st.dataframe(display_table(detail), width="stretch", hide_index=True)
             st.download_button(
@@ -1642,7 +1648,7 @@ with time_tab:
                 file_name="tbb_zaman_analizi.csv",
                 mime="text/csv",
             )
-        with quality_tab:
+        elif time_view == "Veri kalitesi":
             render_quality(
                 analysis_data,
                 comparison_periods,
@@ -1654,7 +1660,7 @@ with time_tab:
             render_source_availability_notes(context)
 
 
-with calculator_tab:
+elif main_view == "Özelleştirilebilir metrikler":
     st.subheader("Özelleştirilebilir metrikler")
     with st.container(border=True):
         st.markdown("#### Formül bileşenleri")
@@ -1836,10 +1842,13 @@ with calculator_tab:
             formula_error = str(exc)
             calculation["result"] = pd.NA
 
-        graph_tab, table_tab, quality_tab = st.tabs(
-            ["Grafik", "Veri tablosu", "Veri kalitesi"]
+        calculator_view = st.radio(
+            "Hesaplama görünümü",
+            ["Grafik", "Veri tablosu", "Veri kalitesi"],
+            horizontal=True,
+            key="calculator_view",
         )
-        with graph_tab:
+        if calculator_view == "Grafik":
             if formula_error:
                 st.error(formula_error)
             else:
@@ -1883,7 +1892,7 @@ with calculator_tab:
                 "result": "Formül sonucu",
             }
         )
-        with table_tab:
+        if calculator_view == "Veri tablosu":
             if formula_error:
                 st.error(formula_error)
             st.dataframe(
@@ -1896,7 +1905,7 @@ with calculator_tab:
                 mime="text/csv",
             )
 
-        with quality_tab:
+        elif calculator_view == "Veri kalitesi":
             complete_rows = int(
                 calculation[list(selected_metrics)].notna().all(axis=1).sum()
             )
@@ -1958,7 +1967,7 @@ with calculator_tab:
                 st.caption("Eksik kayıt listesi boş: seçilen kapsam eksiksiz.")
 
 
-with simulation_tab:
+elif main_view == "Metrik simülasyonu":
     st.subheader("Metrik simülasyonu")
     st.caption(
         "İki metriğin oranını seçin; metriklere yüzdesel şok uygulayarak "
@@ -2165,7 +2174,7 @@ with simulation_tab:
                         color="entity_name",
                         line_dash="Senaryo",
                         markers=True,
-                        color_discrete_sequence=COLORS,
+                        color_discrete_sequence=SIMULATION_ENTITY_COLORS,
                         labels={
                             "period_label": "Dönem",
                             "Sonuç": operation,
@@ -2192,7 +2201,7 @@ with simulation_tab:
                     color="entity_name",
                     pattern_shape="Senaryo",
                     barmode="group",
-                    color_discrete_sequence=COLORS,
+                    color_discrete_sequence=SIMULATION_ENTITY_COLORS,
                     labels={
                         "period_label": "Dönem",
                         "Sonuç": operation,
@@ -2261,15 +2270,29 @@ with simulation_tab:
                 value_decimals=4,
             )
 
-        single_tab, multi_tab, simulation_table_tab, simulation_quality_tab = st.tabs(
-            ["Tek banka", "Birden fazla banka", "Veri tablosu", "Veri kalitesi"]
+        simulation_view = st.radio(
+            "Simülasyon görünümü",
+            ["Tek banka", "Birden fazla banka", "Veri tablosu", "Veri kalitesi"],
+            horizontal=True,
+            key="simulation_view",
         )
         default_entity = (
             "Türkiye Halk Bankası A.Ş."
             if "Türkiye Halk Bankası A.Ş." in simulation_entities
             else simulation_entities[0]
         )
-        with single_tab:
+        multi_selection_key = f"simulation_multi_entity_selection_{simulation_entity_type}"
+        multi_entities = [
+            name
+            for name in st.session_state.get(multi_selection_key, ["Türkiye Halk Bankası A.Ş."])
+            if name in simulation_entities
+        ]
+        if not multi_entities and "Türkiye Halk Bankası A.Ş." in simulation_entities:
+            multi_entities = ["Türkiye Halk Bankası A.Ş."]
+        multi_scenario = valid_scenarios[
+            valid_scenarios["entity_name"].isin(multi_entities)
+        ]
+        if simulation_view == "Tek banka":
             simulation_entity = st.selectbox(
                 "Banka / kurum",
                 simulation_entities,
@@ -2310,7 +2333,7 @@ with simulation_tab:
                     multiple=False,
                 )
 
-        with multi_tab:
+        elif simulation_view == "Birden fazla banka":
             st.markdown("#### Banka/kurum filtresi")
             multi_entities = render_entity_filter(
                 simulation_context,
@@ -2330,7 +2353,7 @@ with simulation_tab:
                     multiple=True,
                 )
 
-        with simulation_table_tab:
+        elif simulation_view == "Veri tablosu":
             st.caption(
                 "Tablo, ‘Birden fazla banka’ sekmesindeki banka/kurum seçimini kullanır."
             )
@@ -2375,7 +2398,7 @@ with simulation_tab:
                     key="simulation_table_download",
                 )
 
-        with simulation_quality_tab:
+        elif simulation_view == "Veri kalitesi":
             st.caption(
                 "Kontrol, ‘Birden fazla banka’ sekmesindeki banka/kurum seçimini kullanır."
             )
