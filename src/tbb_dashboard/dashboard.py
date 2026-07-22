@@ -1442,7 +1442,7 @@ elif main_view == "Zaman analizi":
             "Veri kalitesi",
         ]
         if st.session_state.get("time_view") not in time_view_options:
-            st.session_state["time_view"] = "Dönem seyri"
+            st.session_state["time_view"] = "Sistemik 9 banka"
         time_view = st.radio(
             "Zaman görünümü",
             time_view_options,
