@@ -1212,9 +1212,17 @@ if main_view == "Dönemsel analiz":
             "value", ascending=False
         ).copy()
         ranking_all["Sıra"] = range(1, len(ranking_all) + 1)
+        period_view_options = [
+            "Sistemik 9 banka",
+            "Seçilebilir bankalar",
+            "Veri tablosu",
+            "Veri kalitesi",
+        ]
+        if st.session_state.get("period_view") not in period_view_options:
+            st.session_state["period_view"] = "Seçilebilir bankalar"
         period_view = st.radio(
             "Dönemsel görünüm",
-            ["Sistemik 9 banka", "Seçilebilir bankalar", "Veri tablosu", "Veri kalitesi"],
+            period_view_options,
             horizontal=True,
             key="period_view",
         )
@@ -1424,17 +1432,20 @@ elif main_view == "Zaman analizi":
         endpoints = comparison_data[
             comparison_data["period_end"].isin([start_date, end_date])
         ].copy()
+        time_view_options = [
+            "Sistemik 9 banka",
+            "Dönem seyri",
+            "Başlangıç–bitiş",
+            "Çeyreklik",
+            "Yıllık",
+            "Veri tablosu",
+            "Veri kalitesi",
+        ]
+        if st.session_state.get("time_view") not in time_view_options:
+            st.session_state["time_view"] = "Dönem seyri"
         time_view = st.radio(
             "Zaman görünümü",
-            [
-                "Sistemik 9 banka",
-                "Dönem seyri",
-                "Başlangıç–bitiş",
-                "Çeyreklik",
-                "Yıllık",
-                "Veri tablosu",
-                "Veri kalitesi",
-            ],
+            time_view_options,
             horizontal=True,
             key="time_view",
         )
