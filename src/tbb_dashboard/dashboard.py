@@ -47,17 +47,6 @@ COLORS = [
     "#254D73",  # okyanus mavisi
 ]
 SIMULATION_COLORS = COLORS[:2]
-SIMULATION_ENTITY_COLORS = COLORS
-CONTINUOUS_COLORS = [
-    "#D8E8F2",
-    "#A9C4E0",
-    "#78B7D1",
-    "#4A86B8",
-    "#2D68B8",
-    "#0E7C91",
-    "#2155A3",
-    "#173B6C",
-]
 SOURCE_AVAILABILITY_NOTES = {
     ("pasifler", "ser_benz", "summary_available"): (
         "Ayrıntılı Ser.Benz. sayfası kaynak dönemde yayımlanmamış; toplam değer "
@@ -82,6 +71,17 @@ SYSTEMIC_BANK_GROUPS = (
     ("QNB Bank A.Ş.", "QNB Finansbank A.Ş."),
     ("Denizbank A.Ş.",),
 )
+SYSTEMIC_BANK_COLOR_GROUPS = (
+    ("Akbank T.A.Ş.",),
+    ("Denizbank A.Ş.",),
+    ("Türkiye Cumhuriyeti Ziraat Bankası A.Ş.",),
+    ("Türkiye Garanti Bankası A.Ş.",),
+    ("Türkiye Halk Bankası A.Ş.",),
+    ("Türkiye Vakıflar Bankası T.A.O.",),
+    ("Türkiye İş Bankası A.Ş.",),
+    ("Yapı ve Kredi Bankası A.Ş.",),
+    ("QNB Bank A.Ş.", "QNB Finansbank A.Ş."),
+)
 READY_BANK_FILTERS = (
     "İlk 10 (seçili metrik)",
     "İlk 15 (seçili metrik)",
@@ -102,6 +102,20 @@ def systemic_entities(all_entities: list[str]) -> list[str]:
         for aliases in SYSTEMIC_BANK_GROUPS
         if (match := next((name for name in aliases if name in available), None))
     ]
+
+
+def entity_color_map(entities) -> dict[str, str]:
+    """Return stable bank/institution colors from the shared blue palette."""
+    colors = {
+        alias: COLORS[index]
+        for index, aliases in enumerate(SYSTEMIC_BANK_COLOR_GROUPS)
+        for alias in aliases
+    }
+    for name in dict.fromkeys(str(entity) for entity in entities if pd.notna(entity)):
+        if name not in colors:
+            digest = hashlib.sha1(name.encode("utf-8")).hexdigest()
+            colors[name] = COLORS[int(digest, 16) % len(COLORS)]
+    return colors
 
 
 def query(sql: str, params: tuple = ()) -> pd.DataFrame:
@@ -796,6 +810,7 @@ def make_time_figure(
     chart_data = frame.dropna(subset=[value_column]).copy()
     if chart_data.empty:
         return None
+    chart_colors = entity_color_map(chart_data["entity_name"])
     if chart_type == "Daire":
         chart_data = chart_data[chart_data["period_end"] == snapshot_period].copy()
         if chart_data.empty:
@@ -806,7 +821,8 @@ def make_time_figure(
             names="entity_name",
             values="pie_value",
             hole=0.38,
-            color_discrete_sequence=COLORS,
+            color="entity_name",
+            color_discrete_map=chart_colors,
         )
         figure.update_traces(
             texttemplate="%{value:,.2f}<br>%{percent:.1%}",
@@ -823,7 +839,7 @@ def make_time_figure(
                 value_column: value_label,
                 "entity_name": "Banka / kurum",
             },
-            color_discrete_sequence=COLORS,
+            color_discrete_map=chart_colors,
         )
         figure = (
             px.line(**options, markers=True)
@@ -1231,10 +1247,7 @@ if main_view == "Dönemsel analiz":
             systemic_snapshot = ranking_all[
                 ranking_all["entity_name"].isin(systemic_names)
             ].sort_values("value")
-            systemic_color_map = {
-                name: COLORS[index]
-                for index, name in enumerate(sorted(systemic_names))
-            }
+            systemic_color_map = entity_color_map(systemic_names)
             if chart_type == "Daire":
                 systemic_chart_data = systemic_snapshot.copy()
                 systemic_chart_data["pie_value"] = systemic_chart_data["value"].abs()
@@ -1288,6 +1301,7 @@ if main_view == "Dönemsel analiz":
             if snapshot.empty:
                 st.info("Grafik için en az bir banka veya kurum seçin.")
             else:
+                selected_color_map = entity_color_map(snapshot["entity_name"])
                 if chart_type == "Daire":
                     chart_data = snapshot.copy()
                     chart_data["pie_value"] = chart_data["value"].abs()
@@ -1296,16 +1310,18 @@ if main_view == "Dönemsel analiz":
                         names="entity_name",
                         values="pie_value",
                         hole=0.38,
-                        color_discrete_sequence=COLORS,
+                        color="entity_name",
+                        color_discrete_map=selected_color_map,
                     )
                 elif chart_type == "Çizgi":
                     figure = px.line(
                         snapshot,
                         x="entity_name",
                         y="value",
+                        color="entity_name",
                         markers=True,
                         labels={"entity_name": "Banka / kurum", "value": unit},
-                        color_discrete_sequence=[COLORS[0]],
+                        color_discrete_map=selected_color_map,
                     )
                     figure.update_xaxes(tickangle=-25)
                 else:
@@ -1314,11 +1330,10 @@ if main_view == "Dönemsel analiz":
                         x="entity_name",
                         y="value",
                         labels={"entity_name": "Banka / kurum", "value": unit},
-                        color="value",
-                        color_continuous_scale=CONTINUOUS_COLORS,
+                        color="entity_name",
+                        color_discrete_map=selected_color_map,
                     )
                     figure.update_xaxes(tickangle=-25)
-                    figure.update_layout(coloraxis_showscale=False)
                 if chart_type == "Sütun":
                     figure.update_traces(
                         texttemplate="%{y:,.2f}",
@@ -2196,6 +2211,9 @@ elif main_view == "Metrik simülasyonu":
             chart_data["Sonuç etiketi"] = chart_data["Sonuç"].map(
                 lambda value: "" if pd.isna(value) else number_tr(value, 4)
             )
+            simulation_entity_color_map = entity_color_map(
+                chart_data["entity_name"] if multiple else []
+            )
             if simulation_chart_type == "Çizgi":
                 if multiple:
                     figure = px.line(
@@ -2206,7 +2224,7 @@ elif main_view == "Metrik simülasyonu":
                         color="entity_name",
                         line_dash="Senaryo",
                         markers=True,
-                        color_discrete_sequence=SIMULATION_ENTITY_COLORS,
+                        color_discrete_map=simulation_entity_color_map,
                         labels={
                             "period_label": "Dönem",
                             "Sonuç": operation,
@@ -2233,7 +2251,7 @@ elif main_view == "Metrik simülasyonu":
                     color="entity_name",
                     pattern_shape="Senaryo",
                     barmode="group",
-                    color_discrete_sequence=SIMULATION_ENTITY_COLORS,
+                    color_discrete_map=simulation_entity_color_map,
                     labels={
                         "period_label": "Dönem",
                         "Sonuç": operation,
