@@ -2302,97 +2302,67 @@ elif main_view == "Metrik simülasyonu":
                 value_decimals=4,
             )
 
+        st.markdown("#### Banka/kurum filtresi")
+        selected_entities = render_entity_filter(
+            simulation_context,
+            "simulation",
+            simulation_end,
+            default_selection="halkbank",
+        )
+        selected_scenario = valid_scenarios[
+            valid_scenarios["entity_name"].isin(selected_entities)
+        ]
+        simulation_view_options = [
+            "Simülasyon grafiği",
+            "Veri tablosu",
+            "Veri kalitesi",
+        ]
+        if st.session_state.get("simulation_view") not in simulation_view_options:
+            st.session_state["simulation_view"] = "Simülasyon grafiği"
         simulation_view = st.radio(
             "Simülasyon görünümü",
-            ["Tek banka", "Birden fazla banka", "Veri tablosu", "Veri kalitesi"],
+            simulation_view_options,
             horizontal=True,
             key="simulation_view",
         )
-        default_entity = (
-            "Türkiye Halk Bankası A.Ş."
-            if "Türkiye Halk Bankası A.Ş." in simulation_entities
-            else simulation_entities[0]
-        )
-        multi_selection_key = f"simulation_multi_entity_selection_{simulation_entity_type}"
-        multi_entities = [
-            name
-            for name in st.session_state.get(multi_selection_key, ["Türkiye Halk Bankası A.Ş."])
-            if name in simulation_entities
-        ]
-        if not multi_entities and "Türkiye Halk Bankası A.Ş." in simulation_entities:
-            multi_entities = ["Türkiye Halk Bankası A.Ş."]
-        multi_scenario = valid_scenarios[
-            valid_scenarios["entity_name"].isin(multi_entities)
-        ]
-        if simulation_view == "Tek banka":
-            simulation_entity = st.selectbox(
-                "Banka / kurum",
-                simulation_entities,
-                index=simulation_entities.index(default_entity),
-                key="simulation_entity",
-            )
-            single_scenario = valid_scenarios[
-                valid_scenarios["entity_name"] == simulation_entity
-            ]
-            if single_scenario.empty:
+        if simulation_view == "Simülasyon grafiği":
+            if selected_scenario.empty:
                 st.warning(
-                    "Seçilen banka ve dönem aralığında iki metrik birlikte "
-                    "bulunmuyor veya payda sıfır."
+                    "Grafik için en az bir banka/kurum seçin; seçili dönemlerde "
+                    "iki metriğin ve sıfırdan farklı paydanın bulunduğundan emin olun."
                 )
             else:
-                last_row = single_scenario.sort_values("period_end").iloc[-1]
-                r1, r2, r3 = st.columns(3)
-                r1.metric(
-                    simulation_metric_a_name,
-                    number_tr(last_row["Simüle Metrik A"]),
-                )
-                r2.metric(
-                    simulation_metric_b_name,
-                    number_tr(last_row["Simüle Metrik B"]),
-                )
-                r3.metric(
-                    "Simüle oran",
-                    (
-                        f"%{number_tr(last_row['Simülasyon'], 4)}"
-                        if multiplier == 100
-                        else number_tr(last_row["Simülasyon"], 4)
-                    ),
-                    delta=f"%{number_tr(last_row['Değişim (%)'], 4)}",
-                )
+                if len(selected_entities) == 1:
+                    last_row = selected_scenario.sort_values("period_end").iloc[-1]
+                    r1, r2, r3 = st.columns(3)
+                    r1.metric(
+                        simulation_metric_a_name,
+                        number_tr(last_row["Simüle Metrik A"]),
+                    )
+                    r2.metric(
+                        simulation_metric_b_name,
+                        number_tr(last_row["Simüle Metrik B"]),
+                    )
+                    r3.metric(
+                        "Simüle oran",
+                        (
+                            f"%{number_tr(last_row['Simülasyon'], 4)}"
+                            if multiplier == 100
+                            else number_tr(last_row["Simülasyon"], 4)
+                        ),
+                        delta=f"%{number_tr(last_row['Değişim (%)'], 4)}",
+                    )
                 simulation_chart(
-                    single_scenario,
-                    "metric_simulation_single_chart",
-                    multiple=False,
-                )
-
-        elif simulation_view == "Birden fazla banka":
-            st.markdown("#### Banka/kurum filtresi")
-            multi_entities = render_entity_filter(
-                simulation_context,
-                "simulation_multi",
-                simulation_end,
-                default_selection="halkbank",
-            )
-            multi_scenario = valid_scenarios[
-                valid_scenarios["entity_name"].isin(multi_entities)
-            ]
-            if multi_scenario.empty:
-                st.warning("Çoklu simülasyon için en az bir banka/kurum seçin.")
-            else:
-                simulation_chart(
-                    multi_scenario,
-                    "metric_simulation_multi_chart",
-                    multiple=True,
+                    selected_scenario,
+                    "metric_simulation_chart",
+                    multiple=len(selected_entities) > 1,
                 )
 
         elif simulation_view == "Veri tablosu":
-            st.caption(
-                "Tablo, ‘Birden fazla banka’ sekmesindeki banka/kurum seçimini kullanır."
-            )
-            if not multi_entities:
-                st.info("Veri tablosu için çoklu banka sekmesinden seçim yapın.")
+            if not selected_entities:
+                st.info("Veri tablosu için en az bir banka/kurum seçin.")
             else:
-                simulation_table = multi_scenario.rename(
+                simulation_table = selected_scenario.rename(
                     columns={
                         "period_label": "Dönem",
                         "entity_name": "Banka / kurum",
@@ -2431,18 +2401,15 @@ elif main_view == "Metrik simülasyonu":
                 )
 
         elif simulation_view == "Veri kalitesi":
-            st.caption(
-                "Kontrol, ‘Birden fazla banka’ sekmesindeki banka/kurum seçimini kullanır."
-            )
-            if not multi_entities:
-                st.info("Veri kalitesini ölçmek için çoklu banka sekmesinden seçim yapın.")
+            if not selected_entities:
+                st.info("Veri kalitesini ölçmek için en az bir banka/kurum seçin.")
             selected_periods = [
                 period
                 for period in simulation_periods
                 if simulation_start <= period <= simulation_end
             ]
             expected = pd.MultiIndex.from_product(
-                [selected_periods, multi_entities],
+                [selected_periods, selected_entities],
                 names=["period_end", "entity_name"],
             )
             missing_parts = []
@@ -2452,7 +2419,7 @@ elif main_view == "Metrik simülasyonu":
             ):
                 actual = pd.MultiIndex.from_frame(
                     metric_frame[
-                        metric_frame["entity_name"].isin(multi_entities)
+                        metric_frame["entity_name"].isin(selected_entities)
                     ].dropna(subset=[value_column])[
                         ["period_end", "entity_name"]
                     ].drop_duplicates()
@@ -2470,7 +2437,7 @@ elif main_view == "Metrik simülasyonu":
                 else 0
             )
             zero_denominators = all_scenarios[
-                all_scenarios["entity_name"].isin(multi_entities)
+                all_scenarios["entity_name"].isin(selected_entities)
                 & (
                     (all_scenarios["Metrik B"] == 0)
                     | (all_scenarios["Simüle Metrik B"] == 0)
@@ -2500,7 +2467,7 @@ elif main_view == "Metrik simülasyonu":
                 )
             elif len(zero_denominators):
                 st.warning("Eksik kayıt yok; ancak oranı engelleyen sıfır paydalar var.")
-            elif multi_entities:
+            elif selected_entities:
                 st.success("Seçilen simülasyon kapsamında eksik kayıt yok.")
             if len(zero_denominators):
                 zero_table = zero_denominators.copy()
