@@ -1219,7 +1219,7 @@ if main_view == "Dönemsel analiz":
             "Veri kalitesi",
         ]
         if st.session_state.get("period_view") not in period_view_options:
-            st.session_state["period_view"] = "Seçilebilir bankalar"
+            st.session_state["period_view"] = "Sistemik 9 banka"
         period_view = st.radio(
             "Dönemsel görünüm",
             period_view_options,
