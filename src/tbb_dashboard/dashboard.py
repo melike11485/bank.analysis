@@ -1478,6 +1478,9 @@ elif main_view == "Zaman analizi":
                 st.info("Grafik için en az bir banka veya kurum seçin.")
             elif chart_type == "Daire":
                 chart_data = comparison_data.copy()
+                chart_data[["period_label", "entity_name"]] = chart_data[
+                    ["period_label", "entity_name"]
+                ].astype("string")
                 chart_data["chart_value"] = chart_data["value"].abs()
                 figure = px.sunburst(
                     chart_data,
