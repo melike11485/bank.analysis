@@ -48,7 +48,7 @@ COLORS = [
 ]
 SIMULATION_COLORS = [
     "#24496E",  # mevcut: koyu lacivert
-    "#97506D",  # simülasyon: mat mürdüm
+    "#2A8F98",  # simülasyon: mat turkuaz
 ]
 CONTINUOUS_COLORS = [
     "#D8E8F2",
@@ -174,15 +174,33 @@ def apply_chart_number_format(figure, decimals: int = 0) -> None:
     x_value = f"%{{x:,.{decimals}f}}"
     y_value = f"%{{y:,.{decimals}f}}"
     pie_value = f"%{{value:,.{decimals}f}}"
+    scatter_points = sum(
+        len(trace.x) if trace.x is not None else 0
+        for trace in figure.data
+        if trace.type == "scatter"
+    )
+    # Çok serili çizgi grafiklerde her noktayı etiketlemek okunabilirliği bozar.
+    # Tek banka veya az sayıda noktadan oluşan çizgilerde değerler doğrudan görünür.
+    show_scatter_labels = scatter_points <= 48
     for trace in figure.data:
         if trace.type == "scatter":
-            trace.update(
-                texttemplate=y_value,
-                textposition="top center",
-                hovertemplate=(
-                    f"%{{fullData.name}}<br>%{{x}}<br>{y_value}<extra></extra>"
-                ),
-            )
+            updates = {
+                "hovertemplate": f"%{{fullData.name}}<br>%{{x}}<br>{y_value}<extra></extra>"
+            }
+            if show_scatter_labels:
+                mode = trace.mode or "lines+markers"
+                if "text" not in mode:
+                    mode = f"{mode}+text"
+                updates.update(
+                    {
+                        "mode": mode,
+                        "texttemplate": y_value,
+                        "textposition": "top center",
+                        "cliponaxis": False,
+                        "textfont": {"size": 10, "color": "#5B6B85"},
+                    }
+                )
+            trace.update(**updates)
         elif trace.type == "bar":
             horizontal = getattr(trace, "orientation", None) == "h"
             trace.update(
