@@ -340,8 +340,6 @@ def activate_entity_selection_view(namespace: str) -> None:
     view_targets = {
         "period": ("period_view", "Seçilebilir bankalar"),
         "time": ("time_view", "Dönem seyri"),
-        "calculator": ("calculator_view", "Grafik"),
-        "simulation_multi": ("simulation_view", "Birden fazla banka"),
     }
     target = view_targets.get(namespace)
     if target:
@@ -1233,6 +1231,10 @@ if main_view == "Dönemsel analiz":
             systemic_snapshot = ranking_all[
                 ranking_all["entity_name"].isin(systemic_names)
             ].sort_values("value")
+            systemic_color_map = {
+                name: COLORS[index]
+                for index, name in enumerate(sorted(systemic_names))
+            }
             if chart_type == "Daire":
                 systemic_chart_data = systemic_snapshot.copy()
                 systemic_chart_data["pie_value"] = systemic_chart_data["value"].abs()
@@ -1241,16 +1243,18 @@ if main_view == "Dönemsel analiz":
                     names="entity_name",
                     values="pie_value",
                     hole=0.38,
-                    color_discrete_sequence=COLORS,
+                    color="entity_name",
+                    color_discrete_map=systemic_color_map,
                 )
             elif chart_type == "Çizgi":
                 systemic_figure = px.line(
                     systemic_snapshot,
                     x="entity_name",
                     y="value",
+                    color="entity_name",
                     markers=True,
                     labels={"entity_name": "Banka / kurum", "value": unit},
-                    color_discrete_sequence=[COLORS[0]],
+                    color_discrete_map=systemic_color_map,
                 )
                 systemic_figure.update_xaxes(tickangle=-25)
             else:
@@ -1260,10 +1264,9 @@ if main_view == "Dönemsel analiz":
                     y="entity_name",
                     orientation="h",
                     labels={"entity_name": "", "value": unit},
-                    color="value",
-                    color_continuous_scale=CONTINUOUS_COLORS,
+                    color="entity_name",
+                    color_discrete_map=systemic_color_map,
                 )
-                systemic_figure.update_layout(coloraxis_showscale=False)
             add_snapshot_value_labels(systemic_figure, chart_type)
             systemic_figure.update_layout(
                 height=520,
