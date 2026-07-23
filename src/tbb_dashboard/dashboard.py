@@ -1414,7 +1414,23 @@ elif main_view == "Zaman analizi":
     context = render_metric_filters("time", catalog)
     if context:
         dates = context["period_dates"]
-        c1, c2, c3, c4 = st.columns([1, 1, 2, 1])
+        time_view_options = [
+            "Sistemik 9 banka",
+            "Dönem seyri",
+            "Başlangıç–bitiş",
+            "Çeyreklik",
+            "Yıllık",
+            "Veri tablosu",
+            "Veri kalitesi",
+        ]
+        if st.session_state.get("time_view") not in time_view_options:
+            st.session_state["time_view"] = "Sistemik 9 banka"
+        is_change_view = st.session_state["time_view"] in {"Çeyreklik", "Yıllık"}
+        if is_change_view:
+            c1, c2, c3 = st.columns([1, 1, 3])
+            c4 = None
+        else:
+            c1, c2, c3, c4 = st.columns([1, 1, 2, 1])
         with c1:
             december_2023 = next(
                 (
@@ -1451,15 +1467,17 @@ elif main_view == "Zaman analizi":
                 end_date,
                 default_selection="halkbank",
             )
-        with c4:
-            chart_type = render_chart_selector(
-                "time",
-                default=(
-                    "Çizgi"
-                    if context["metric_key"] == CAPITAL_ADEQUACY_METRIC
-                    else "Sütun"
-                ),
-            )
+        chart_type = None
+        if c4 is not None:
+            with c4:
+                chart_type = render_chart_selector(
+                    "time",
+                    default=(
+                        "Çizgi"
+                        if context["metric_key"] == CAPITAL_ADEQUACY_METRIC
+                        else "Sütun"
+                    ),
+                )
         data = context["data"]
         comparison_periods = [item for item in dates if start_date <= item <= end_date]
         comparison_data = data[
@@ -1482,17 +1500,6 @@ elif main_view == "Zaman analizi":
         endpoints = comparison_data[
             comparison_data["period_end"].isin([start_date, end_date])
         ].copy()
-        time_view_options = [
-            "Sistemik 9 banka",
-            "Dönem seyri",
-            "Başlangıç–bitiş",
-            "Çeyreklik",
-            "Yıllık",
-            "Veri tablosu",
-            "Veri kalitesi",
-        ]
-        if st.session_state.get("time_view") not in time_view_options:
-            st.session_state["time_view"] = "Sistemik 9 banka"
         time_view = st.radio(
             "Zaman görünümü",
             time_view_options,
@@ -1593,12 +1600,20 @@ elif main_view == "Zaman analizi":
                     period for period in comparison_periods if period.month == 12
                 ]
 
-            st.subheader(f"{period_name} değer")
+            value_title_col, value_selector_col = st.columns([3, 2])
+            with value_title_col:
+                st.subheader(f"{period_name} değer")
+            with value_selector_col:
+                value_chart_type = render_chart_selector(
+                    f"time_{period_name.lower()}_value",
+                    default="Sütun",
+                    label="Değer grafiği",
+                )
             value_figure = make_time_figure(
                 chart_frame,
                 "value",
                 context["unit"],
-                chart_type,
+                value_chart_type,
                 chart_periods,
                 context["period_labels"],
                 end_date,
@@ -1609,17 +1624,25 @@ elif main_view == "Zaman analizi":
                 render_downloadable_chart(
                     value_figure,
                     standard_export_frame(chart_frame),
-                    f"time_{period_name.lower()}_value_chart_{chart_type}",
+                    f"time_{period_name.lower()}_value_chart_{value_chart_type}",
                     f"tbb_zaman_{period_name.lower()}_deger",
                 )
 
             st.divider()
-            st.subheader(f"{period_name} değişim")
+            change_title_col, change_selector_col = st.columns([3, 2])
+            with change_title_col:
+                st.subheader(f"{period_name} değişim")
+            with change_selector_col:
+                change_chart_type = render_chart_selector(
+                    f"time_{period_name.lower()}_change",
+                    default="Çizgi",
+                    label="Değişim grafiği",
+                )
             change_figure = make_time_figure(
                 chart_frame,
                 change_column,
                 change_label,
-                chart_type,
+                change_chart_type,
                 chart_periods,
                 context["period_labels"],
                 end_date,
@@ -1630,7 +1653,7 @@ elif main_view == "Zaman analizi":
                 render_downloadable_chart(
                     change_figure,
                     standard_export_frame(chart_frame, [change_column]),
-                    f"time_{change_column}_chart_{chart_type}",
+                    f"time_{change_column}_chart_{change_chart_type}",
                     f"tbb_zaman_{change_column}",
                 )
         comparison = endpoints.pivot_table(
