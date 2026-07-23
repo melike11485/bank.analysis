@@ -919,7 +919,7 @@ def add_snapshot_value_labels(figure, chart_type: str) -> None:
         )
     else:
         figure.update_traces(
-            texttemplate="%{x:,.2f}",
+            texttemplate="%{y:,.2f}",
             textposition="outside",
             cliponaxis=False,
         )
@@ -1278,7 +1278,8 @@ if main_view == "Dönemsel analiz":
             )
             systemic_snapshot = ranking_all[
                 ranking_all["entity_name"].isin(systemic_names)
-            ].sort_values("value")
+            ].sort_values("value", ascending=False)
+            systemic_order = systemic_snapshot["entity_name"].tolist()
             systemic_color_map = entity_color_map(systemic_names)
             if chart_type == "Daire":
                 systemic_chart_data = systemic_snapshot.copy()
@@ -1300,18 +1301,20 @@ if main_view == "Dönemsel analiz":
                     markers=True,
                     labels={"entity_name": "Banka / kurum", "value": unit},
                     color_discrete_map=systemic_color_map,
+                    category_orders={"entity_name": systemic_order},
                 )
                 systemic_figure.update_xaxes(tickangle=-25)
             else:
                 systemic_figure = px.bar(
                     systemic_snapshot,
-                    x="value",
-                    y="entity_name",
-                    orientation="h",
-                    labels={"entity_name": "", "value": unit},
+                    x="entity_name",
+                    y="value",
+                    labels={"entity_name": "Banka / kurum", "value": unit},
                     color="entity_name",
                     color_discrete_map=systemic_color_map,
+                    category_orders={"entity_name": systemic_order},
                 )
+                systemic_figure.update_xaxes(tickangle=-25)
             add_snapshot_value_labels(systemic_figure, chart_type)
             systemic_figure.update_layout(
                 height=520,
@@ -1334,6 +1337,7 @@ if main_view == "Dönemsel analiz":
                 st.info("Grafik için en az bir banka veya kurum seçin.")
             else:
                 selected_color_map = entity_color_map(snapshot["entity_name"])
+                selected_order = snapshot["entity_name"].tolist()
                 if chart_type == "Daire":
                     chart_data = snapshot.copy()
                     chart_data["pie_value"] = chart_data["value"].abs()
@@ -1354,6 +1358,7 @@ if main_view == "Dönemsel analiz":
                         markers=True,
                         labels={"entity_name": "Banka / kurum", "value": unit},
                         color_discrete_map=selected_color_map,
+                        category_orders={"entity_name": selected_order},
                     )
                     figure.update_xaxes(tickangle=-25)
                 else:
@@ -1364,6 +1369,7 @@ if main_view == "Dönemsel analiz":
                         labels={"entity_name": "Banka / kurum", "value": unit},
                         color="entity_name",
                         color_discrete_map=selected_color_map,
+                        category_orders={"entity_name": selected_order},
                     )
                     figure.update_xaxes(tickangle=-25)
                 if chart_type == "Sütun":
