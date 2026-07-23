@@ -18,6 +18,7 @@ if str(ROOT) not in sys.path:
 
 from src.tbb_dashboard.labels import SHEET_LABELS, metric_display_label
 from src.tbb_dashboard.ingest import ensure_database
+from src.tbb_dashboard.colors import COLORS, entity_color_map
 
 
 RAW_DIR = ROOT / "data" / "raw"
@@ -31,36 +32,6 @@ SOURCE_LABELS = {
     "nazim": "Nazım Hesaplar",
 }
 ENTITY_LABELS = {"bank": "Bankalar", "group": "Banka Grupları"}
-COLORS = [
-    "#2D68B8",  # gerçek mavi
-    "#173B6C",  # lacivert
-    "#78B7D1",  # gök mavisi
-    "#4A86B8",  # çelik mavisi
-    "#0E7C91",  # deniz mavisi
-    "#586C9C",  # mat peygamber çiçeği mavisi
-    "#A9C4E0",  # sisli mavi
-    "#2155A3",  # safir mavisi
-    "#6F8194",  # mavi gri
-    "#2A8F98",  # mat turkuaz
-    "#44527C",  # mor-lacivert
-    "#8EAAC2",  # açık çelik mavisi
-    "#254D73",  # okyanus mavisi
-    "#3F6FA5",  # arduvaz mavisi
-    "#5B8DB8",  # yumuşak mavi
-    "#88AFCB",  # buz mavisi
-    "#356E7D",  # koyu petrol mavisi
-    "#4E7D8F",  # dumanlı turkuaz
-    "#6B9EAA",  # açık petrol mavisi
-    "#315C8C",  # kraliyet mavisi
-    "#5670A6",  # mat indigo
-    "#7F91B8",  # lavanta mavisi
-    "#2F7F86",  # derin turkuaz
-    "#6595C2",  # göl mavisi
-    "#9AB6CC",  # soluk mavi
-    "#344F70",  # gece mavisi
-    "#527E9D",  # koyu gök mavisi
-    "#79A6BE",  # puslu camgöbeği
-]
 SIMULATION_COLORS = COLORS[:2]
 SOURCE_AVAILABILITY_NOTES = {
     ("pasifler", "ser_benz", "summary_available"): (
@@ -86,17 +57,6 @@ SYSTEMIC_BANK_GROUPS = (
     ("QNB Bank A.Ş.", "QNB Finansbank A.Ş."),
     ("Denizbank A.Ş.",),
 )
-SYSTEMIC_BANK_COLOR_GROUPS = (
-    ("Akbank T.A.Ş.",),
-    ("Denizbank A.Ş.",),
-    ("Türkiye Cumhuriyeti Ziraat Bankası A.Ş.",),
-    ("Türkiye Garanti Bankası A.Ş.",),
-    ("Türkiye Halk Bankası A.Ş.",),
-    ("Türkiye Vakıflar Bankası T.A.O.",),
-    ("Türkiye İş Bankası A.Ş.",),
-    ("Yapı ve Kredi Bankası A.Ş.",),
-    ("QNB Bank A.Ş.", "QNB Finansbank A.Ş."),
-)
 READY_BANK_FILTERS = (
     "İlk 10 (seçili metrik)",
     "İlk 15 (seçili metrik)",
@@ -117,37 +77,6 @@ def systemic_entities(all_entities: list[str]) -> list[str]:
         for aliases in SYSTEMIC_BANK_GROUPS
         if (match := next((name for name in aliases if name in available), None))
     ]
-
-
-def entity_color_map(entities) -> dict[str, str]:
-    """Return stable bank/institution colors from the shared blue palette."""
-    colors = {
-        alias: COLORS[index]
-        for index, aliases in enumerate(SYSTEMIC_BANK_COLOR_GROUPS)
-        for alias in aliases
-    }
-    available_colors = COLORS[len(SYSTEMIC_BANK_COLOR_GROUPS) :]
-    used_colors = set(colors.values())
-    names = sorted(
-        dict.fromkeys(str(entity) for entity in entities if pd.notna(entity))
-    )
-    for name in names:
-        if name in colors:
-            continue
-        digest = hashlib.sha1(name.encode("utf-8")).hexdigest()
-        start = int(digest, 16) % len(available_colors)
-        color = next(
-            (
-                available_colors[(start + offset) % len(available_colors)]
-                for offset in range(len(available_colors))
-                if available_colors[(start + offset) % len(available_colors)]
-                not in used_colors
-            ),
-            available_colors[start],
-        )
-        colors[name] = color
-        used_colors.add(color)
-    return colors
 
 
 def query(sql: str, params: tuple = ()) -> pd.DataFrame:

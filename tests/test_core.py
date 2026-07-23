@@ -4,6 +4,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from src.tbb_dashboard.download import DEFAULT_START, parse_period, quarter_range
+from src.tbb_dashboard.colors import HALKBANK_COLOR, entity_color_map
 from src.tbb_dashboard.labels import metric_display_label
 from src.tbb_dashboard.ingest import (
     availability_status,
@@ -43,6 +44,22 @@ class CoreTests(TestCase):
     def test_turkish_names_have_stable_keys(self) -> None:
         self.assertEqual(canonical_text("Mali Bünye"), "mali_bunye")
         self.assertEqual(canonical_text("İstikrarlı Fonlama Oranı"), "istikrarli_fonlama_orani")
+
+    def test_halkbank_has_fixed_brand_color(self) -> None:
+        colors = entity_color_map(["Türkiye Halk Bankası A.Ş."])
+        self.assertEqual(colors["Türkiye Halk Bankası A.Ş."], HALKBANK_COLOR)
+
+    def test_entity_colors_do_not_collide_beyond_base_palette(self) -> None:
+        entities = [f"Örnek Banka {index}" for index in range(60)]
+        colors = entity_color_map(entities)
+        assigned = [colors[name] for name in entities]
+        self.assertEqual(len(assigned), len(set(assigned)))
+
+    def test_entity_color_is_stable_across_different_selections(self) -> None:
+        target = "Örnek Banka"
+        single_color = entity_color_map([target])[target]
+        group_color = entity_color_map(["Başka Banka", target, "Üçüncü Banka"])[target]
+        self.assertEqual(single_color, group_color)
 
     def test_period_folder_maps_to_quarter_end(self) -> None:
         self.assertEqual(
